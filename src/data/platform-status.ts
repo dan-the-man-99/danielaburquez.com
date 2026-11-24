@@ -5,7 +5,7 @@
 // `evidence` excerpts are copied word for word from files in this repo. Run
 // `npm run check:evidence` after editing any of those files: it fails if an excerpt no
 // longer matches. A line that is only "…" marks skipped lines.
-export const asOf = '23 November 2026';
+export const asOf = '24 November 2026';
 
 export interface Evidence { file: string; lines: string[] }
 export interface Piece { phase: number; name: string; detail: string; evidence?: Evidence[] }

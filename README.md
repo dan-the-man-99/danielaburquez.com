@@ -51,6 +51,17 @@ later: no root, read-only filesystem, no Linux capabilities, resource caps.
 | `src/scripts/headline.js` | The headline's motion: in each word one letter at a time rolls out and back in (up, down, left or right) after a random pause of up to 2 s, and the star turns slowly and spins faster while the page scrolls. Letters are an `aria-hidden` copy; screen readers read the plain heading. Off under reduced motion. |
 | `src/scripts/site.js` | Entry point for the small page enhancements, one module each: `clock.js` (Palawan time), `section-nav.js` (current-section highlight, phone "Email me" bar), `theme-toggle.js` (colour theme button), `logo.js` (rolling DAN letter), `strip.js` (platform strip fill-in), `planned-fold.js` (folds planned phases on phones). `roll.js` is the letter-roll helper shared with `headline.js`. |
 
+## Deploy (Cloudflare Pages, until the cluster exists)
+
+The live site is this build uploaded to the Cloudflare Pages project `danielaburquez`,
+with `danielaburquez.com` and `www` attached as custom domains (proxied CNAMEs to
+`danielaburquez.pages.dev`). `public/_headers` supplies the security headers.
+
+```sh
+npm run build && npm run check:evidence && npm run check:headers
+npx wrangler pages deploy dist --project-name danielaburquez --branch main
+```
+
 ## Rules this repo follows
 
 - **No secrets in Git.** `gitleaks` runs before every commit (see below).
