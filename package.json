@@ -10,7 +10,8 @@
     "build": "astro build",
     "preview": "astro preview",
     "astro": "astro",
-    "check:evidence": "node --experimental-strip-types --no-warnings scripts/check-evidence.mjs"
+    "check:evidence": "node --experimental-strip-types --no-warnings scripts/check-evidence.mjs",
+    "check:headers": "node scripts/check-headers.mjs"
   },
   "dependencies": {
     "@fontsource-variable/archivo": "5.3.0",

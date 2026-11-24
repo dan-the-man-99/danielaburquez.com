@@ -1,0 +1,16 @@
+# Cloudflare Pages response headers: the same policy as security-headers.conf
+# (nginx), so the Pages copy of the site is exactly as strict as the container.
+# `npm run check:headers` fails if the two files disagree.
+/*
+  Content-Security-Policy: default-src 'self'; img-src 'self' data:; object-src 'none'; base-uri 'none'; form-action 'none'; frame-ancestors 'none'
+  Strict-Transport-Security: max-age=31536000
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: camera=(), microphone=(), geolocation=(), payment=(), usb=()
+  Cross-Origin-Opener-Policy: same-origin
+  Cross-Origin-Resource-Policy: same-origin
+
+# Fingerprinted filenames never change, so they can be cached for a year.
+/_astro/*
+  Cache-Control: public, max-age=31536000, immutable
