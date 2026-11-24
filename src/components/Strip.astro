@@ -1,0 +1,19 @@
+---
+// The platform strip: one cell per piece of the platform, built ones filled first.
+// Used on the home page and on /how-this-site-works, both from the same data file.
+// src/scripts/strip.js fills the built cells in once the first time the strip is seen.
+import { built, planned } from '../data/platform-status';
+
+const pieces = [
+  ...built.map((b) => ({ name: b.name, done: true })),
+  ...planned.map((b) => ({ name: b.name, done: false })),
+];
+---
+
+<ol class="strip" data-strip aria-label={`${built.length} of ${pieces.length} pieces built`}>
+  {pieces.map((piece) => (
+    <li class={piece.done ? 'is-built' : undefined} title={piece.name}>
+      <span class="sr-only">{piece.done ? 'Built' : 'Planned'}: {piece.name}</span>
+    </li>
+  ))}
+</ol>

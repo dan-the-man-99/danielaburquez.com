@@ -1,0 +1,159 @@
+---
+import Base from '../layouts/Base.astro';
+import Hero from '../components/Hero.astro';
+import Project from '../components/Project.astro';
+import SectionBar from '../components/SectionBar.astro';
+import Flow from '../components/Flow.astro';
+import Strip from '../components/Strip.astro';
+import { asOf, built, planned } from '../data/platform-status';
+
+// Issuer set large, credential in serif; every one links to its public Credly badge.
+const certs = [
+  { issuer: 'AWS', name: 'Certified Solutions Architect – Associate', url: 'https://www.credly.com/badges/3479011c-070f-46a1-8ed5-b8e2313cc44c/public_url' },
+  { issuer: 'AWS', name: 'Certified Cloud Practitioner', url: 'https://www.credly.com/badges/f0de3124-0a08-4f20-a538-55abbe6da7ca/public_url' },
+  { issuer: 'Google', name: 'Cybersecurity Professional Certificate', url: 'https://www.credly.com/badges/9115f6f9-07ea-4443-95cc-2542f1083220/public_url' },
+  { issuer: 'Cisco', name: 'CCNA', url: 'https://www.credly.com/badges/bd26ed2b-aa4b-4865-8401-fa29f0bf1811/public_url', expired: true },
+];
+
+// Each automation's flow: a step is one box; an array is a split into two results.
+const flows = {
+  offers: ['Gmail', 'OpenAI', 'Google Sheets + Drive', ['Reply to the agent', 'Telegram alert']],
+  crm: ['Trello', 'n8n', 'Follow Up Boss'],
+  inbox: ['Messenger', 'n8n + OpenAI', ['Reply to the guest', 'Booking to Google Sheets + Gmail']],
+};
+---
+
+<Base
+  title="Daniel Aburquez: automations, AI tools and websites for businesses"
+  description="Less busywork, more business. I build automations, AI tools and websites that give business owners and teams their time back."
+>
+  <Hero />
+
+  <section id="work">
+    <SectionBar label="Selected work" />
+
+    <Project
+      name="We Nailed It Media"
+      url="https://wenaileditmedia.com"
+      image="we-nailed-it.png"
+      mobileImage="we-nailed-it-mobile.png"
+      alt="The We Nailed It Media homepage: a dark, full-screen photo of a modern building with the headline We make your work seen."
+    >
+      Portfolio, reviews, blog and booking for an LA creative agency. Designed
+      and built from scratch.
+    </Project>
+
+    <Project
+      name="We Match It"
+      url="https://we-matchit.com"
+      image="we-match-it.png"
+      mobileImage="we-match-it-mobile.png"
+      alt="The We Match It homepage. Headline: In a world where hiring is becoming automated, we keep it human."
+      flip
+    >
+      A recruiting site connecting U.S. businesses with Filipino remote
+      professionals. Designed and built from scratch.
+    </Project>
+  </section>
+
+  <!--
+    Automation examples are described plainly and anonymised. Only state what
+    the system does, never a result that has not been measured.
+  -->
+  <section id="automations">
+    <SectionBar label="Automations" tag="More on request" />
+    <div class="cells cols-3">
+      <article class="case">
+        <h3>Offers from email into a spreadsheet</h3>
+        <p>Reads PDF offers, files the key terms by property, and replies to the agent.</p>
+        <Flow steps={flows.offers} tools={['Gmail', 'OpenAI', 'Google Sheets', 'Google Drive', 'Telegram']} />
+      </article>
+      <article class="case">
+        <h3>Trello and the CRM kept in step</h3>
+        <p>New and moved Trello cards update the deal in Follow Up Boss.</p>
+        <Flow steps={flows.crm} tools={['Trello', 'n8n', 'Follow Up Boss']} />
+      </article>
+      <article class="case">
+        <h3>A restaurant's Messenger inbox, answered</h3>
+        <p>Answers menu questions, handles bookings, and steps back when staff reply.</p>
+        <Flow steps={flows.inbox} tools={['Messenger', 'n8n', 'OpenAI', 'Google Sheets', 'Gmail']} />
+      </article>
+    </div>
+    <div class="cells cols-2">
+      <div class="notes-cell">
+        <h3 class="mono note-title">Live now</h3>
+        <p>Digital loyalty cards in Apple and Google Wallet, running for two clients.</p>
+      </div>
+      <div class="notes-cell">
+        <h3 class="mono note-title">In progress</h3>
+        <p>A Telegram delivery dispatch board for small shops and riders.</p>
+      </div>
+    </div>
+  </section>
+
+  <!--
+    Claims rule (see platform/docs/brand-philosophy.md): only what is live and
+    verifiable. Keep this section in step with the status list on
+    /how-this-site-works. Don't add uptime, speed scores or "monitored" claims
+    until the data and the status page exist.
+  -->
+  <section id="built-right">
+    <SectionBar label="Built step by step" />
+    <div class="cells cols-asym">
+      <p class="statement display">This site is also my DevOps portfolio.</p>
+      <div class="prose">
+        <p>
+          Built one piece at a time, the way I'd build it for a client. Nothing
+          is listed until it works.
+        </p>
+      </div>
+    </div>
+    <div class="cells">
+      <div class="progress">
+        <Strip />
+        <div class="progress-foot">
+          <p class="progress-count"><strong>{built.length} of {built.length + planned.length}</strong> built and tested on my machine, as of {asOf}.</p>
+          <a class="button" href="/how-this-site-works">What's built so far</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="about">
+    <SectionBar label="About" />
+    <div class="about">
+      <p class="about-statement">
+        Most businesses lose hours every week to work a computer should handle.
+      </p>
+      <p class="about-note">
+        I fix that. I'm a DevOps engineer and indie developer, so you work
+        directly with me.
+      </p>
+    </div>
+  </section>
+
+  <section id="certs">
+    <SectionBar label="Certifications" />
+    <ul class="cells cols-2 cert-grid">
+      {certs.map((c) => (
+        <li>
+          <a class={c.expired ? 'cert is-expired' : 'cert'} href={c.url} target="_blank" rel="noopener">
+            <span class="cert-issuer display">{c.issuer}</span>
+            <span class="cert-name">{c.name}</span>
+            <span class="cert-foot mono">{c.expired ? 'Expired. Verify on Credly' : 'Verify on Credly'}</span>
+            <span class="sr-only"> (opens in a new tab)</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section class="contact" id="contact">
+    <SectionBar label="Contact" />
+    <div class="contact-body">
+      <h2 class="contact-title display">Got a project in mind?</h2>
+      <p class="measure">Tell me what you need. I reply within a day or two.</p>
+      <p><a class="email" href="mailto:hello@danielaburquez.com">hello@<br class="br-phone" /><wbr />danielaburquez.com</a></p>
+    </div>
+  </section>
+</Base>

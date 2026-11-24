@@ -1,0 +1,72 @@
+---
+import { getImage } from 'astro:assets';
+
+interface Props {
+  name: string;
+  url: string; // full link, e.g. https://we-matchit.com
+  image?: string; // desktop screenshot: file name inside src/assets/work/
+  mobileImage?: string; // optional phone-shaped screenshot, used under 48rem
+  alt: string; // describes the screenshot for people who can't see it
+  flip?: boolean; // desktop: put the text on the left and the image on the right
+}
+const { name, url, image, mobileImage, alt, flip = false } = Astro.props;
+
+// Look screenshots up by file name. A missing file means that project simply
+// renders without an image, so a missing screenshot never breaks the build.
+const shots = import.meta.glob<ImageMetadata>('../assets/work/*.{png,jpg,jpeg,webp}', {
+  eager: true,
+  import: 'default',
+});
+const find = (file?: string) => (file ? shots[`../assets/work/${file}`] : undefined);
+const desktop = find(image);
+const phone = find(mobileImage);
+
+const desktopSet = desktop && (await getImage({ src: desktop, format: 'webp', widths: [720, 1100, 1440], quality: 82 }));
+const phoneSet = phone && (await getImage({ src: phone, format: 'webp', widths: [390, 664], quality: 82 }));
+const host = new URL(url).host;
+---
+
+<article class={flip ? 'project project-flip' : 'project'}>
+  <div class="cells project-cells">
+    <div class="project-text">
+      <div>
+        <h3 class="project-name display">{name}</h3>
+        <p class="project-desc"><slot /></p>
+      </div>
+      <p class="project-link"><a href={url} target="_blank" rel="noopener">Visit {host}<span class="sr-only"> (opens in a new tab)</span></a></p>
+    </div>
+    {
+      desktop && desktopSet && (
+        <div class="project-shot">
+          <a class="shot" href={url} target="_blank" rel="noopener" aria-label={`Visit ${name} (${host}, opens in a new tab)`}>
+            <span class="browser-bar" aria-hidden="true">
+              <span class="dots"><i></i><i></i><i></i></span>
+              <span class="browser-url mono">{host}</span>
+            </span>
+            <picture>
+              {phone && phoneSet && (
+                <source
+                  media="(max-width: 47.99rem)"
+                  srcset={phoneSet.srcSet.attribute}
+                  sizes="100vw"
+                  width={phone.width}
+                  height={phone.height}
+                />
+              )}
+              <img
+                src={desktopSet.src}
+                srcset={desktopSet.srcSet.attribute}
+                sizes="(min-width: 75rem) 760px, (min-width: 48rem) 56vw, 88vw"
+                width={desktop.width}
+                height={desktop.height}
+                alt={alt}
+                loading="lazy"
+                decoding="async"
+              />
+            </picture>
+          </a>
+        </div>
+      )
+    }
+  </div>
+</article>

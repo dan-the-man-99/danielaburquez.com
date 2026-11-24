@@ -1,0 +1,23 @@
+---
+// The footer strip: the tools behind the work shown on this site, scrolling past.
+// Only list tools used in live client work or in this site as it runs today; add
+// Terraform, k3s, Argo CD and the rest when those phases are live. Decoration for
+// sighted visitors (aria-hidden); it stops for anyone who asked for reduced motion.
+const tools = [
+  'n8n', 'OpenAI', 'Gmail', 'Google Sheets', 'Google Drive', 'Trello',
+  'Follow Up Boss', 'Messenger', 'Telegram', 'Astro', 'Docker', 'nginx', 'AWS', 'Cloudflare', 'Cloudflare R2', 'Railway', 'MySQL', 'PostgreSQL',
+];
+// Repeat the list enough times that one copy is wider than any screen, then show
+// two copies side by side so the loop (translate -50%) has no visible seam.
+const run = Array.from({ length: 3 }, () => tools).flat();
+---
+
+<div class="ticker" aria-hidden="true">
+  <div class="ticker-track">
+    {[0, 1].map(() => (
+      <span class="ticker-run">
+        {run.map((t) => (<><span class="ticker-item">{t}</span><span class="ticker-star">✦</span></>))}
+      </span>
+    ))}
+  </div>
+</div>

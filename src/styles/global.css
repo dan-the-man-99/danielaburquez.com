@@ -1,0 +1,498 @@
+/* Served as a real file (never inlined) so the CSP can use style-src 'self'
+   with no 'unsafe-inline'. Fonts are self-hosted via @fontsource (see
+   Base.astro). Written mobile-first: base rules are for phones, @media
+   (min-width) adds the desktop layout.
+
+   Look: a two-colour, ruled-grid page. One flat ground, one ink, hairlines
+   between every block. The page is a bordered frame on a dark margin. Giant
+   condensed headlines, small mono labels, serif body text. The "colour theme"
+   button switches to a white-on-black night theme. */
+
+:root {
+  /* Fixed brand colours */
+  --abyss: #06202f;
+  --sun: #f6c453;
+
+  /* Light theme: sun-yellow ground, deep sea-blue ink */
+  --ground: #f6c453;
+  --ink: #06202f;
+  --muted: rgb(6 32 47 / 0.78);
+  --rule: rgb(6 32 47 / 0.55);
+  --focus: var(--ink);
+  --edge: #06202f;      /* the margin around the frame */
+  --accent: #f6c453;    /* the phone "Email me" button */
+  color-scheme: light;
+
+  --display: 'Archivo Variable', 'Arial Black', Impact, sans-serif;
+  --serif: 'Newsreader Variable', Georgia, 'Times New Roman', serif;
+  --mono: 'Martian Mono Variable', ui-monospace, Menlo, Consolas, monospace;
+  /* Golden ratio (φ ≈ 1.618). Spacing steps grow by φ from 1rem; the big type steps
+     grow by φ from the 1.25rem body text; two-column blocks split 61.8 / 38.2. */
+  --s-1: 0.618rem; --s0: 1rem; --s1: 1.618rem; --s2: 2.618rem; --s3: 4.236rem; --s4: 6.854rem;
+  --t-mid: 1.59rem;   /* 1.25 × √φ: card and list titles */
+  --t1: 2.023rem;     /* 1.25 × φ: statements, project names */
+  --t2: 3.272rem;     /* 1.25 × φ²: the hero statement */
+  --t3: 5.295rem;     /* 1.25 × φ³: closing titles */
+  --pad: clamp(var(--s1), 3.82vw, var(--s3));   /* the one spacing dial: block padding follows it */
+  --margin: 0.5rem;
+  /* Small mono labels: two sizes, nothing under 13px */
+  --m0: 0.8125rem;   /* labels, captions, flow steps (13px) */
+  --m1: 0.9375rem;   /* buttons and links (15px) */
+}
+
+/* Night theme, warm off-white on near-black (softer than pure white on black): used when the visitor's system asks for it (unless they picked
+   light with the button), or when they picked dark with the button. The two
+   blocks must stay identical. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    --ground: #0b0f13;
+    --ink: #f4efe2;
+    --muted: rgb(244 239 226 / 0.74);
+    --rule: rgb(244 239 226 / 0.42);
+    --focus: var(--ink);
+    --edge: #0b0f13;
+    --accent: #f4efe2;
+    color-scheme: dark;
+  }
+}
+:root[data-theme='dark'] {
+  --ground: #0b0f13;
+  --ink: #f4efe2;
+  --muted: rgb(244 239 226 / 0.74);
+  --rule: rgb(244 239 226 / 0.42);
+  --focus: var(--ink);
+  --edge: #0b0f13;
+  --accent: #f4efe2;
+  color-scheme: dark;
+}
+
+@media (min-width: 48rem) { :root { --margin: 1rem; } }
+/* Small phones: slightly smaller body text so long paragraphs don't run several screens */
+@media (max-width: 30rem) { body { font-size: 1.125rem; } }
+/* Narrowest phones (≤360px): keep the location label and the "Visit …" links on one line */
+@media (max-width: 22.5rem) {
+}
+/* Phones: the sticky bottom button is the one email link. Screenshots are shown whole
+   (they are phone-shaped captures, so nothing is cropped) */
+@media (max-width: 47.99rem) {
+  .hero-actions .text-link { display: none; }   /* the bottom bar and the Contact tab already say "talk" */
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--edge);
+  color: var(--ink);
+  font: 1.25rem/1.62 var(--serif);
+  font-optical-sizing: auto;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* The frame: everything lives inside one bordered panel */
+.frame { margin: var(--margin); background: var(--ground); border: 1px solid var(--rule); overflow: clip; }
+
+h1, h2, h3 { margin: 0; text-wrap: balance; font-weight: 400; }
+p { margin: 0 0 1rem; }
+.prose > :last-child { margin-bottom: 0; }
+.measure { max-width: 36rem; }
+.muted { color: var(--muted); }
+
+a { color: inherit; text-decoration-thickness: 1px; text-underline-offset: 0.2em; }
+@media (hover: hover) { a:hover { text-decoration-thickness: 3px; } }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: -3px; }
+a:focus-visible, button:focus-visible { outline-offset: 2px; }
+
+.sr-only { position: absolute; width: 1px; height: 1px; margin: -1px; padding: 0; overflow: hidden; clip-path: inset(50%); white-space: nowrap; border: 0; }
+
+/* Type roles */
+.mono { font: 500 var(--m0)/1.5 var(--mono); letter-spacing: 0.02em; }
+.display { font-family: var(--display); font-weight: 800; font-stretch: 125%; text-transform: uppercase; line-height: 0.98; letter-spacing: -0.015em; }
+.statement { font: 560 clamp(var(--t-mid), 3.2vw, var(--t1))/1.18 var(--serif); letter-spacing: -0.015em; margin: 0 0 var(--s1); text-wrap: balance; }
+.statement.display { font: 800 clamp(var(--t-mid), 3vw, var(--t1))/1.02 var(--display); font-stretch: 125%; letter-spacing: -0.015em; text-transform: uppercase; }
+
+/* Caps only for tiny tags: the clock label, the beach caption, the tools strip */
+.chart-tag, .chart-clock .mono { text-transform: uppercase; letter-spacing: 0.08em; }
+
+/* Buttons */
+.button {
+  display: inline-flex; align-items: center; justify-content: center;
+  min-height: 3rem; padding: 0.7rem 1.5rem;
+  background: var(--ink); color: var(--ground); border: 1px solid var(--ink);
+  font: 500 var(--m1)/1.2 var(--mono); letter-spacing: 0.02em; text-decoration: none;
+}
+@media (hover: hover) { .button:hover { background: transparent; color: var(--ink); text-decoration: none; } }
+.text-link { display: inline-flex; align-items: center; min-height: 3rem; font: 500 var(--m1)/1.2 var(--mono); letter-spacing: 0.02em; }
+
+/* ---------- Masthead: a row of ruled cells ---------- */
+.masthead {
+  display: grid; gap: 1px; background: var(--rule); border-bottom: 1px solid var(--rule);
+  grid-template-columns: 1fr 3.5rem;
+  grid-template-areas: 'logo toggle' 'nav nav';
+}
+@media (min-width: 48rem) {
+  .masthead { grid-template-columns: auto 1fr 3.5rem; grid-template-areas: 'logo meta toggle' 'nav nav nav'; }
+}
+.masthead > * { background: var(--ground); margin: 0; }
+.cell-logo { grid-area: logo; display: flex; align-items: center; justify-content: flex-start; min-height: 4.5rem; padding-inline: 1.1rem; font: 900 1.5rem/0.94 var(--display); font-stretch: 125%; text-decoration: none; letter-spacing: -0.03em; }
+@media (hover: hover) { .cell-logo:hover { background: var(--ink); color: var(--ground); text-decoration: none; } }
+.logo-word { display: inline-flex; }   /* DAN: letters roll like the headline's (src/scripts/logo.js); line-height 0.94 matches the .ch clip */
+.cell-tag { grid-area: tag; display: none; align-items: center; padding: 0 var(--pad); margin: 0; }
+.cell-nav { grid-area: nav; display: flex; }
+.cell-nav a { flex: 1; display: flex; align-items: center; justify-content: center; min-height: 3rem; padding-inline: 0.75rem; font: 500 var(--m0)/1 var(--mono); letter-spacing: 0.02em; text-decoration: none; }
+/* the current section is always marked; hover only where a pointer can really hover (touch keeps :hover after a tap) */
+.cell-nav a[aria-current] { background: var(--ink); color: var(--ground); }
+@media (hover: hover) { .cell-nav a:hover { background: var(--ink); color: var(--ground); } }
+.cell-toggle { grid-area: toggle; display: flex; align-items: center; justify-content: center; border: 0; padding: 0; color: inherit; font: inherit; cursor: pointer; }
+@media (hover: hover) { .cell-toggle:hover { background: var(--ink); color: var(--ground); } }
+.cell-meta { grid-area: meta; display: flex; flex-direction: column; justify-content: center; padding-inline: 0.9rem; min-width: 0; }
+.cell-meta a { font: 560 1.15rem/1.2 var(--serif); text-decoration: none; }
+@media (hover: hover) { .cell-meta a:hover { text-decoration: underline; text-decoration-thickness: 2px; } }
+@media (max-width: 47.99rem) { .cell-meta { display: none; } }   /* phones: the bottom bar is the email link */
+/* Narrowest phones: a smaller DAN and tighter padding so the location fits beside it */
+@media (max-width: 22.5rem) {
+  .cell-logo { padding-inline: 0.75rem; font-size: 1.35rem; justify-content: flex-start; }
+  .cell-meta { padding-inline: 0.7rem; }
+  .masthead { grid-template-columns: 1fr 3rem; }   /* theme button stays a 48px tap target */
+}
+
+/* Phones and tablets: the whole bar is sticky but offset by the height of its top
+   row, so DA/location/theme scroll away and only the About/Work/Contact strip
+   stays pinned. Sections leave room for it when jumped to. */
+@media (max-width: 63.99rem) {
+  .masthead { position: sticky; top: calc(-4.5rem - 1px); z-index: 10; }
+  .cell-logo, .cell-meta, .cell-toggle { height: 4.5rem; }
+  main section[id] { scroll-margin-top: 3.25rem; }
+}
+
+/* Desktop: the masthead becomes a sticky rail down the left edge, with a
+   numbered index of the page's sections. */
+.rail-index, .toggle-label { display: none; }
+@media (min-width: 64rem) {
+  .frame { display: grid; grid-template-columns: 16.5rem minmax(0, 1fr); grid-template-areas: 'rail main' 'rail foot'; grid-template-rows: auto 1fr; align-items: start; }
+  .frame > main { grid-area: main; min-width: 0; }
+  .frame > footer { grid-area: foot; min-width: 0; align-self: end; }
+  .masthead {
+    grid-area: rail; position: sticky; top: var(--margin); align-self: start;
+    display: flex; flex-direction: column; gap: 0;
+    height: calc(100vh - 2 * var(--margin) - 2px); overflow-y: auto;
+    border-right: 1px solid var(--rule); border-bottom: 0; background: var(--ground);
+  }
+  .masthead > * { border-bottom: 1px solid var(--rule); background: transparent; }
+  .cell-nav { display: none; }
+  .cell-logo { justify-content: flex-start; min-height: 7rem; padding: 0 1.5rem; font-size: 2.6rem; }
+  .cell-tag { display: block; padding: 1.25rem 1.5rem; }
+  .rail-index { display: flex; flex-direction: column; flex: 1; border-bottom: 0; }
+  .rail-index ol { list-style: none; margin: 0; padding: 0; }
+  .rail-index li { border-bottom: 1px solid var(--rule); }
+  .rail-index a, .rail-page { display: flex; gap: 0.75rem; align-items: baseline; padding: 0.95rem 1.5rem; font: 500 var(--m0)/1.3 var(--mono); letter-spacing: 0.02em; text-decoration: none; }
+  .rail-index a[aria-current] { background: var(--ink); color: var(--ground); }
+  @media (hover: hover) { .rail-index a:hover { background: var(--ink); color: var(--ground); } }
+  .rail-page { margin-top: auto; border-top: 1px solid var(--rule); justify-content: space-between; }
+  .cell-toggle { justify-content: flex-start; gap: 0.75rem; padding: 1rem 1.5rem; width: 100%; text-align: left; }
+  .toggle-label { display: inline; }
+  .cell-meta { padding: 1.1rem 1.5rem; border-bottom: 0; }
+  .cell-meta a { font-size: 1.35rem; display: inline-flex; align-items: center; min-height: 2.75rem; }
+}
+
+/* ---------- Tools strip: the tools behind the work, scrolling past in the footer ---------- */
+.ticker { overflow: hidden; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding-block: 0.85rem; font: 500 var(--m0)/1 var(--mono); letter-spacing: 0.14em; text-transform: uppercase; white-space: nowrap; user-select: none; }
+.ticker-track { display: flex; width: max-content; }
+.ticker-run { display: flex; align-items: center; }
+.ticker-item { padding-inline: 1.25rem; }
+.ticker-star { font-size: 0.8em; opacity: 0.6; }
+@media (prefers-reduced-motion: no-preference) {
+  .ticker-track { animation: tick 90s linear infinite; }
+  @media (hover: hover) { .ticker:hover .ticker-track { animation-play-state: paused; } }
+}
+@keyframes tick { to { transform: translateX(-50%); } }
+
+/* ---------- Hero ---------- */
+/* The headline: two lines on phones, one line from tablet up so the beach sits
+   higher. The letters are drawn as separate boxes (aria-hidden) so single ones
+   can roll; screen readers get the plain sentence. */
+.mega-wrap { container-type: inline-size; padding: clamp(var(--s2), 6cqw, var(--s3)) var(--pad); border-bottom: 1px solid var(--rule); }
+.mega { margin: 0; font: 900 10.2cqw/0.94 var(--display); font-stretch: 125%; text-transform: uppercase; letter-spacing: -0.035em; white-space: nowrap; }
+.mega-art { display: flex; flex-wrap: wrap; align-items: center; column-gap: 0.2em; }
+.mega-word { display: inline-flex; }
+.mega .star { width: 0.5em; height: 0.5em; flex: none; will-change: transform; }
+@media (min-width: 48rem) {
+  .mega { font-size: 5.55cqw; }
+  .mega-art { flex-wrap: nowrap; justify-content: space-between; }
+}
+/* One letter: it slides out one way and the same letter slides back in from the
+   opposite side, clipped to its own box. */
+.ch { display: inline-block; clip-path: inset(0.1em -0.06em 0.125em); }   /* clipped to the capitals (measured: they sit 0.115em below the box top, 0.135em above its bottom) */
+.ch > span { display: inline-block; }
+.ch.roll-up > span { animation: roll-up 0.72s cubic-bezier(0.7, 0, 0.3, 1); }
+.ch.roll-down > span { animation: roll-down 0.72s cubic-bezier(0.7, 0, 0.3, 1); }
+.ch.roll-left > span { animation: roll-left 0.72s cubic-bezier(0.7, 0, 0.3, 1); }
+.ch.roll-right > span { animation: roll-right 0.72s cubic-bezier(0.7, 0, 0.3, 1); }
+@keyframes roll-up { 50% { transform: translateY(-105%); } 50.01% { transform: translateY(105%); } }
+@keyframes roll-down { 50% { transform: translateY(105%); } 50.01% { transform: translateY(-105%); } }
+@keyframes roll-left { 50% { transform: translateX(-115%); } 50.01% { transform: translateX(115%); } }
+@keyframes roll-right { 50% { transform: translateX(115%); } 50.01% { transform: translateX(-115%); } }
+
+/* Tablet and up: the hero is one screen. The headline and the statement + intro hug
+   their content and the beach takes everything left (about 60% of the space under the
+   headline, close to 61.8%). On a very short window the hero simply grows. */
+@media (min-width: 48rem) {
+  .hero { display: grid; grid-template-rows: auto minmax(16rem, 1fr) auto; min-height: calc(100svh - 2 * var(--margin) - 2px); }
+  .chart { min-height: 0; }
+  .chart canvas { position: absolute; inset: 0; }   /* sized by the grid row, never pushes it */
+  .hero-actions { margin-top: var(--s1); }
+}
+
+/* The beach: an animated ASCII scene. Decoration only (see beach.js). */
+.chart { position: relative; border-bottom: 1px solid var(--rule); color: var(--ink); }
+.chart canvas { display: block; width: 100%; height: 100%; }
+.chart-tag { position: absolute; left: 0; bottom: 0; margin: 0; padding: 0.45rem var(--pad) 0.45rem 0.9rem; background: var(--ground); border-top: 1px solid var(--rule); border-right: 1px solid var(--rule); font-size: var(--m0); letter-spacing: 0.08em; }
+/* Palawan's local time, pinned to a top corner of the scene */
+.chart-clock { position: absolute; top: 0; right: 0; margin: 0; display: flex; align-items: baseline; gap: 0.75rem; padding: 0.55rem 0.9rem 0.6rem; background: var(--ground); border-left: 1px solid var(--rule); border-bottom: 1px solid var(--rule); }
+.chart-clock[hidden] { display: none; }
+.chart-clock .mono { font-size: var(--m0); color: var(--muted); }
+.chart-clock time { font: 800 clamp(1.1rem, 1.9vw, 1.6rem)/1 var(--display); font-stretch: 125%; letter-spacing: -0.02em; text-transform: uppercase; }
+/* What the man on the beach is thinking: placed by beach.js above his head */
+.thought {
+  position: absolute; left: 0; top: 0; z-index: 2; max-width: min(17rem, 70%); margin: 0;
+  padding: 0.6rem 0.85rem; background: var(--ground); border: 1px solid var(--ink); border-radius: 1.1rem;
+  font: 500 var(--m0)/1.45 var(--mono); letter-spacing: 0.02em; pointer-events: none;
+  opacity: 0; transform: translateY(0.4rem) scale(0.96); transform-origin: var(--tail, 1.5rem) 100%;
+}
+.thought::before, .thought::after { content: ''; position: absolute; left: var(--tail, 1.5rem); border: 1px solid var(--ink); border-radius: 50%; background: var(--ground); }
+.thought::before { width: 0.6rem; height: 0.6rem; bottom: -0.95rem; margin-left: -0.3rem; }
+.thought::after { width: 0.35rem; height: 0.35rem; bottom: -1.6rem; margin-left: -0.55rem; }
+.thought.is-on { opacity: 1; transform: none; }
+@media (prefers-reduced-motion: no-preference) { .thought { transition: opacity 0.3s ease, transform 0.3s ease; } }
+/* Phones: no beach. A detailed ASCII scene needs a wide screen, so below 48rem the
+   canvas, the thought bubble and the caption are hidden (beach.js doesn't even start)
+   and only the Palawan clock stays, as a row under the headline. */
+@media (max-width: 47.99rem) {
+  .chart canvas, .chart .thought, .chart-tag { display: none; }
+  .chart-clock { position: static; border: 0; }
+}
+
+.hero-copy .statement { max-width: 14ch; margin: 0; font-size: var(--t1); line-height: 1.08; }
+.hero-lede { line-height: 1.5; max-width: 34rem; }
+.hero-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.25rem var(--s1); margin: var(--s2) 0 0; }
+.hero-actions .button { flex: 1 1 auto; }
+@media (min-width: 30rem) { .hero-actions .button { flex: 0 0 auto; } }
+
+/* ---------- Ruled cells ---------- */
+.cells { display: grid; gap: 1px; background: var(--rule); border-bottom: 1px solid var(--rule); margin: 0; padding: 0; list-style: none; }
+.cells > * { background: var(--ground); padding: calc(var(--pad) * 1.236) var(--pad); margin: 0; min-width: 0; }
+@media (min-width: 48rem) {
+  .cols-2 { grid-template-columns: repeat(2, 1fr); }
+  .cols-3 { grid-template-columns: repeat(3, 1fr); }
+  .cols-asym { grid-template-columns: 1.618fr 1fr; }   /* 61.8 / 38.2 */
+  .cols-hero { grid-template-columns: 1.618fr 1fr; }   /* statement 61.8 / intro 38.2 */
+  .cols-hero > * { padding-block: var(--s2); }          /* tighter, so the whole hero fits one screen */
+  .hero-copy .statement { font-size: var(--t2); }
+}
+
+/* Sections stack directly: each opens with one solid ink bar naming it, and no rule
+   closes the block above it. */
+.frame main > section:not(.contact) { background: var(--ground); }
+.frame main > section > .cells:last-child,
+.frame main > section > .project:last-child .cells,
+.certs li:last-child { border-bottom: 0; }
+
+/* Section label: a solid ink bar with a mono name and an optional small tag */
+.bar-label { display: flex; justify-content: space-between; align-items: center; gap: 1rem; min-height: 3.25rem; margin: 0; padding: 0.8rem var(--pad); background: var(--ink); color: var(--ground); font: 600 var(--m1)/1.3 var(--mono); letter-spacing: 0.02em; }
+.bar-label span + span { font-weight: 500; font-size: var(--m0); white-space: nowrap; }   /* the right-hand tag: smaller, never wraps */
+
+
+/* ---------- Work ---------- */
+.project + .project { border-top: 0; }
+.project-text { display: flex; flex-direction: column; justify-content: center; gap: var(--s2); }
+.project-name { font-size: clamp(var(--t-mid), 7.5vw, var(--t1)); margin-bottom: var(--s0); }
+.project-desc { max-width: 30rem; margin: 0; }
+.project-link { margin: 0; font: 500 var(--m1)/1.2 var(--mono); letter-spacing: 0.02em; }
+.project-link a { display: inline-flex; align-items: center; min-height: 2.75rem; }
+.project-shot { display: flex; align-items: center; }
+@media (max-width: 22.5rem) { .project-link { letter-spacing: 0; } }
+
+/* The screenshot sits in a thin frame on a hard block of ink */
+.shot { position: relative; isolation: isolate; display: block; width: 100%; margin: 0 0.6rem 0.6rem 0; }
+.shot::before { content: ''; position: absolute; z-index: -1; inset: 0; background: var(--ink); transform: translate(0.6rem, 0.6rem); }
+.shot { border: 1px solid var(--ink); background: var(--ground); text-decoration: none; }
+.shot img { display: block; width: 100%; height: auto; border-top: 1px solid var(--ink); background: var(--ground); }
+.browser-bar { display: flex; align-items: center; gap: 0.75rem; padding: 0.45rem 0.7rem; background: var(--ground); color: var(--ink); }
+.dots { display: flex; gap: 0.3rem; }
+.dots i { width: 0.55rem; height: 0.55rem; border: 1px solid var(--ink); border-radius: 50%; }
+.browser-url { flex: 1; min-width: 0; padding: 0.15rem 0.6rem; border: 1px solid var(--ink); font-size: var(--m0); letter-spacing: 0.06em; text-transform: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+@media (prefers-reduced-motion: no-preference) {
+  .shot::before { transition: transform 0.2s ease; }
+  @media (hover: hover) { .shot:hover::before { transform: translate(1rem, 1rem); } }
+}
+@media (min-width: 48rem) {
+  .project-cells { grid-template-columns: 1fr 1.618fr; }              /* text 38.2, screenshot 61.8 */
+  .project-flip .project-cells { grid-template-columns: 1.618fr 1fr; }
+  .project-flip .project-shot { order: -1; }
+  .project-name { font-size: clamp(var(--t-mid), 2.8vw, var(--t1)); }
+}
+
+/* Phones: each project is one cell: name and line, the screenshot at 80% width, then the link */
+@media (max-width: 47.99rem) {
+  .project-cells { display: flex; flex-direction: column; gap: var(--s1); background: var(--ground); padding: calc(var(--pad) * 1.236) var(--pad); }
+  .project-cells > * { padding: 0; }
+  .project-text { display: contents; }
+  .project-text > div { order: 1; }
+  .project-shot { order: 2; justify-content: center; }
+  .project-link { order: 3; }
+  .project-shot { margin-inline: calc(var(--pad) * -0.5); }   /* a little wider than the text column */
+  .shot { width: 100%; }
+}
+
+/* ---------- Automations, What I do, notes ---------- */
+.case h3 { font: 560 clamp(1.4rem, 2.4vw, var(--t-mid))/1.2 var(--serif); letter-spacing: -0.012em; margin-bottom: 0.75rem; }
+.case p { margin: 0 0 0.75rem; }
+/* How data moves through each automation, drawn with only the tools it is built with.
+   Steps are a real ordered list; a nested list is a split into two results. */
+.case { display: flex; flex-direction: column; }
+.flow { list-style: none; margin: var(--s1) 0 0; padding: var(--s0) 0 0; border-top: 1px solid var(--rule); --gap: 1.1rem; }
+.flow, .flow ul { display: flex; flex-direction: column; gap: var(--gap); }
+.flow > li, .flow-fork li { position: relative; margin: 0; }
+.flow-step { display: block; padding: 0.5rem 0.75rem; border: 1px solid var(--ink); font: 500 var(--m0)/1.35 var(--mono); }
+.flow-last { border-style: dashed; }
+/* the connector from the step above: a line with a small arrowhead */
+.flow > li + li::before, .flow-fork li::before { content: ''; position: absolute; left: 1.25rem; top: calc(-1 * var(--gap)); height: var(--gap); border-left: 1px solid var(--ink); }
+.flow > li + li::after, .flow-fork li::after { content: ''; position: absolute; left: calc(1.25rem - 3px); top: -5px; width: 6px; height: 6px; border: solid var(--ink); border-width: 0 1px 1px 0; transform: rotate(45deg); }
+.flow > li.fork::before, .flow > li.fork::after { display: none; }
+/* a split: one line down from the step above, a bracket, then a tick into each result */
+.flow-fork { position: relative; list-style: none; margin: 0; padding: 0; flex-direction: row !important; gap: 0.5rem !important; }
+.flow-fork li { flex: 1; min-width: 0; }
+.flow-fork::before { content: ''; position: absolute; left: 1.25rem; top: calc(-1 * var(--gap)); height: calc(var(--gap) / 2); border-left: 1px solid var(--ink); }
+.flow-fork::after { content: ''; position: absolute; left: 1.25rem; top: calc(var(--gap) / -2); width: calc(50% + 0.25rem); border-top: 1px solid var(--ink); }
+.flow-fork li::before { top: calc(var(--gap) / -2); height: calc(var(--gap) / 2); }
+.tools { display: none; margin: var(--s1) 0 0; border-top: 1px solid var(--rule); }
+.tools summary { display: flex; justify-content: space-between; align-items: center; min-height: 2.75rem; cursor: pointer; list-style: none; font: 500 var(--m1)/1.2 var(--mono); letter-spacing: 0.02em; }
+.tools summary::-webkit-details-marker { display: none; }
+.tools summary::after { content: '+'; font-size: 1.25rem; line-height: 1; }
+.tools[open] summary::after { content: '\2212'; }
+.tools p { margin: 0 0 0.5rem; }
+.note-title { margin-bottom: 0.6rem; color: var(--muted); }
+.notes-cell p { margin: 0; max-width: 32rem; }
+
+/* ---------- Built step by step: a strip of the platform's pieces, built first ---------- */
+.progress { display: grid; gap: var(--s1); }
+.strip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(12, 1fr); gap: 0.35rem; }
+.strip li { height: 2.75rem; border: 1px solid var(--ink); }
+.strip li.is-built { background: var(--ink); }
+.progress-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s0) var(--s1); }
+.progress-count { margin: 0; max-width: 44rem; }
+/* The built cells fill in once, left to right, the first time the strip is seen (strip.js arms it).
+   Without JS or with reduced motion the strip is simply drawn filled. */
+@media (prefers-reduced-motion: no-preference) {
+  .strip.is-armed li.is-built { background: transparent; transition: background-color 0.4s ease calc(var(--i) * 140ms); }
+  .strip.is-armed.is-in li.is-built { background: var(--ink); }
+}
+
+/* ---------- About: one large statement, full width, no columns ---------- */
+.about { padding: clamp(var(--s2), 6vw, var(--s3)) var(--pad); }
+.about-statement { max-width: 26ch; margin: 0 0 var(--s1); font: 560 clamp(var(--t1), 5.2vw, var(--t2))/1.12 var(--serif); letter-spacing: -0.02em; text-wrap: balance; }
+.about-note { max-width: 36rem; margin: 0; }
+
+/* ---------- Certifications: a grid; the issuer is the headline, an expired one is muted ---------- */
+.cert-grid > li { padding: 0; }
+.cert { display: flex; flex-direction: column; gap: 0.5rem; height: 100%; padding: var(--pad); text-decoration: none; }
+.cert-issuer { font-size: var(--t-mid); }
+.cert-name { font: 560 clamp(1.15rem, 2.2vw, 1.4rem)/1.25 var(--serif); letter-spacing: -0.01em; }
+.cert-foot { margin-top: auto; padding-top: 0.5rem; }
+.cert.is-expired { color: var(--muted); }
+@media (hover: hover) { .cert:hover { background: var(--ink); color: var(--ground); } }
+
+/* ---------- Contact: the inverted band ---------- */
+.contact { background: var(--ink); color: var(--ground); --focus: var(--ground); --rule: color-mix(in srgb, var(--ground) 55%, transparent); }
+.contact .bar-label { border-bottom: 1px solid var(--rule); }   /* same dark bar as every section, set into the dark panel with a hairline under it */
+.contact-body { padding: clamp(var(--s3), 9vw, var(--s4)) var(--pad); container-type: inline-size; }
+.contact-title { font-size: clamp(var(--t1), 8.5cqw, var(--t3)); margin-bottom: var(--s1); max-width: 14ch; }
+.email { display: inline-flex; align-items: center; min-height: 2.75rem; font: 800 clamp(0.9rem, 4.9cqw, 3.4rem)/1.15 var(--display); font-stretch: 125%; letter-spacing: -0.02em; overflow-wrap: anywhere; text-decoration-thickness: 2px; text-decoration-line: underline; }
+
+/* ---------- Footer ---------- */
+.foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 1.5rem; padding: 0.75rem var(--pad); font: 500 var(--m0)/1.4 var(--mono); letter-spacing: 0.02em; }
+.foot p { margin: 0; display: flex; align-items: center; min-height: 2.5rem; }
+.foot a { display: inline-flex; align-items: center; min-height: 2.5rem; }
+
+/* ---------- Engineering page ---------- */
+.page-title { font-size: clamp(var(--t1), 7vw, var(--t3)); padding: clamp(var(--s1), 4vw, var(--s3)) var(--pad); border-bottom: 1px solid var(--rule); }
+.page-lede { line-height: 1.5; max-width: 38rem; margin: 0 0 1rem; }
+.email-cell { container-type: inline-size; }
+.email-link { display: inline-block; font: 800 clamp(1rem, 7cqw, 2rem)/1.2 var(--display); font-stretch: 125%; letter-spacing: -0.015em; }   /* two lines (hello@ / danielaburquez.com), sized to fit its column */
+code { font: 0.85em var(--mono); background: var(--rule); padding: 0.1em 0.4em; }
+
+/* The roadmap: one ordered list of phases. A built phase is a solid block; planned ones are quiet. */
+.roadmap { list-style: none; margin: 0; padding: 0; }
+.phase { display: grid; gap: var(--s0) var(--s2); padding: var(--s2) var(--pad); border-bottom: 1px solid var(--rule); }
+.phase-head { display: flex; align-items: baseline; gap: var(--s0); }
+.phase-n { font: 800 var(--t-mid)/1 var(--display); font-stretch: 125%; letter-spacing: -0.02em; }
+.phase-status { color: var(--muted); }
+.phase.is-built .phase-status { color: var(--ink); font-weight: 600; }
+.phase-body h3 { font: 560 clamp(1.3rem, 2.4vw, 1.6rem)/1.2 var(--serif); letter-spacing: -0.012em; margin-bottom: 0.5rem; }
+.phase-body p { margin: 0; max-width: 40rem; }
+.phase:not(.is-built) .phase-body p { color: var(--muted); }
+.phase:not(.is-built) .phase-n { font-weight: 500; opacity: 0.7; }
+@media (min-width: 48rem) {
+  .phase { grid-template-columns: 1fr 1.618fr; }   /* label 38.2 / content 61.8 */
+  .phase-head { align-self: start; position: sticky; top: calc(var(--margin) + var(--s0)); }   /* the label stays in view down a long phase */
+}
+.phase.is-built { background: var(--ground); border-left: 0.5rem solid var(--ink); padding-left: calc(var(--pad) - 0.5rem); }
+
+.pieces { list-style: none; margin: var(--s0) 0 0; padding: 0; }
+.pieces > li { padding: var(--s1) 0; border-top: 1px solid var(--rule); }
+.pieces h4 { margin: 0 0 0.35rem; font: 600 1.15rem/1.3 var(--serif); }
+.pieces p { margin: 0; }
+
+/* "See the evidence": the real lines from the real files */
+.evidence { margin-top: var(--s-1); }
+.evidence summary, .planned-fold summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; min-height: 2.75rem; cursor: pointer; list-style: none; font: 500 var(--m1)/1.2 var(--mono); letter-spacing: 0.02em; }
+.evidence summary::-webkit-details-marker, .planned-fold summary::-webkit-details-marker { display: none; }
+.evidence summary { justify-content: flex-start; gap: 0.6rem; }
+.evidence summary::before, .planned-fold summary::after { content: '+'; font-size: 1.1rem; line-height: 1; }
+.evidence[open] summary::before, .planned-fold[open] summary::after { content: '\2212'; }
+.evidence figure { margin: var(--s-1) 0 0; border: 1px solid var(--ink); }
+.evidence figcaption { padding: 0.35rem 0.75rem; background: var(--ink); color: var(--ground); }
+.evidence pre { margin: 0; padding: 0.75rem; overflow-x: auto; font: 500 var(--m0)/1.6 var(--mono); white-space: pre-wrap; overflow-wrap: normal; }   /* wraps at spaces only; a long flag scrolls instead of breaking mid-word */
+.evidence code { font: inherit; background: none; padding: 0; }
+
+/* Planned phases: always open on tablet and up; on phones a toggle (planned-fold.js) folds them away */
+.planned-fold summary { display: none; padding: 0 var(--pad); border-bottom: 1px solid var(--rule); }
+@media (max-width: 47.99rem) { .planned-fold summary { display: flex; } }
+
+/* Decisions: five notes in two columns, so the last one spans the row */
+@media (min-width: 48rem) { .decisions > :last-child:nth-child(odd) { grid-column: 1 / -1; } }
+.decisions h3 { font: 560 clamp(1.3rem, 2.4vw, 1.6rem)/1.2 var(--serif); letter-spacing: -0.012em; margin-bottom: 0.5rem; }
+.decisions p { margin: 0; max-width: 32rem; }
+
+
+/* ---------- Sticky "Email me" bar: phones only ---------- */
+.mobile-bar {
+  position: fixed; inset-inline: 0; bottom: 0; z-index: 20;
+  padding: 0.5rem var(--pad) calc(0.5rem + env(safe-area-inset-bottom, 0px));
+  background: var(--edge); box-shadow: 0 -1px 0 rgb(244 239 226 / 0.12);
+}
+.mobile-bar a { display: flex; align-items: center; justify-content: center; min-height: 2.75rem; background: var(--accent); color: var(--edge); font: 500 var(--m1)/1.2 var(--mono); letter-spacing: 0.02em; text-decoration: none; }
+.mobile-bar a:focus-visible { outline: 3px solid #f4efe2; outline-offset: 2px; }
+@media (prefers-reduced-motion: no-preference) { .mobile-bar { transition: transform 0.25s ease; } }
+.mobile-bar.is-hidden { transform: translateY(110%); }
+@media (max-width: 47.99rem) { body { padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px)); } }
+@media (min-width: 48rem) { .mobile-bar { display: none; } }
+
+/* ---------- Phones: tighter layout (kept last so it wins the cascade) ---------- */
+@media (max-width: 47.99rem) {
+  /* automation flows: no diagram on phones, just a plain list of what each one uses */
+  .flow { display: none; }
+  .tools { display: block; }
+  /* paired cells read as one: the statement and its supporting text share a cell */
+  .cols-hero, .cols-asym { gap: 0; background: var(--ground); }
+  .cols-hero > :first-child, .cols-asym > :first-child { padding-bottom: var(--s0); }
+  .cols-hero > :last-child, .cols-asym > :last-child { padding-top: 0; }
+  /* the contact email: two lines, large, a real tap target */
+  .email { display: inline-block; padding-block: 0.5rem; font-size: 6.2cqw; line-height: 1.2; }
+}
+@media (min-width: 48rem) { .br-phone { display: none; } }
+
+/* Phones: the frame's hairline border would show as a pale line beside the dark highlighted
+   nav cell, so on phones it takes the margin's colour and the page meets the edge cleanly. */
+@media (max-width: 47.99rem) { .frame { border-color: var(--edge); } }

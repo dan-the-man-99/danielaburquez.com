@@ -1,0 +1,6 @@
+---
+interface Props { label: string; tag?: string }
+const { label, tag } = Astro.props;
+---
+
+<h2 class="bar-label"><span>{label}</span>{tag && <span aria-hidden="true">{tag}</span>}</h2>

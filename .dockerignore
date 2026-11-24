@@ -1,0 +1,13 @@
+# Keep the build context small and keep local junk/secrets out of the image.
+node_modules
+dist
+.astro
+.git
+.github
+.env
+.env.*
+*.log
+.vscode
+Dockerfile
+.dockerignore
+README.md

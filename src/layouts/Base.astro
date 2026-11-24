@@ -1,0 +1,88 @@
+---
+import '@fontsource-variable/archivo/wdth.css';
+import '@fontsource-variable/newsreader/opsz.css';
+import '@fontsource-variable/martian-mono';
+import '../styles/global.css';
+import Ticker from '../components/Ticker.astro';
+
+interface Props {
+  title: string;
+  description: string;
+}
+const { title, description } = Astro.props;
+const onGuide = Astro.url.pathname.startsWith('/how-this-site-works');
+
+// The section index shown in the desktop rail. Keep in step with the sections
+// on the home page (ids and order).
+const index = [
+  ['work', 'Selected work'],
+  ['automations', 'Automations'],
+  ['built-right', 'Built step by step'],
+  ['about', 'About'],
+  ['certs', 'Certifications'],
+  ['contact', 'Contact'],
+];
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#06202f" />
+    <title>{title}</title>
+    <meta name="description" content={description} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <!-- Tiny, same-origin: applies a saved colour theme before first paint -->
+    <script is:inline src="/theme.js"></script>
+  </head>
+  <body>
+    <div class="frame">
+      <!-- A top bar on phones and tablets; a sticky left rail from 64rem up -->
+      <header class="masthead">
+        <a class="cell-logo" href="/" aria-label="Daniel Aburquez, home"><span class="logo-word" data-logo-roll aria-hidden="true">{[...'DAN'].map((c) => <span class="ch"><span>{c}</span></span>)}</span></a>
+        <p class="cell-tag mono">Automations, AI tools and websites for businesses</p>
+        <nav class="cell-nav" aria-label="Main">
+          <a href="/#work" data-section="work">Work</a>
+          <a href="/#automations" data-section="automations">Automations</a>
+          <a href="/#about" data-section="about">About</a>
+        </nav>
+        <nav class="rail-index" aria-label="Sections">
+          <ol>
+            {index.map(([id, label]) => (
+              <li><a href={`/#${id}`} data-section={id}>{label}</a></li>
+            ))}
+          </ol>
+          <a class="rail-page" href="/how-this-site-works" aria-current={onGuide ? 'page' : undefined}>How this site works</a>
+        </nav>
+        <button class="cell-toggle" type="button" data-theme-toggle aria-pressed="false" aria-label="Dark colour theme">
+          <svg width="22" height="22" viewBox="0 0 24 24" aria-hidden="true" focusable="false"><circle cx="12" cy="12" r="9" fill="none" stroke="currentColor" stroke-width="2"/><path d="M12 3a9 9 0 0 1 0 18z" fill="currentColor"/></svg>
+          <span class="toggle-label mono" aria-hidden="true">Swap colours</span>
+        </button>
+        <div class="cell-meta">
+          <a href="mailto:hello@danielaburquez.com">Email me</a>
+        </div>
+      </header>
+
+      <main>
+        <slot />
+      </main>
+
+      <footer>
+        <Ticker seed={11} />
+        <div class="foot">
+          <p>© 2026 Daniel Aburquez</p>
+          <a href="/how-this-site-works">How this site works</a>
+        </div>
+      </footer>
+    </div>
+
+    <div class="mobile-bar">
+      <a href="mailto:hello@danielaburquez.com">Email me</a>
+    </div>
+
+    <script>
+      import '../scripts/site.js';
+    </script>
+  </body>
+</html>

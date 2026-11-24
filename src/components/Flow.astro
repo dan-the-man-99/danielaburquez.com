@@ -1,0 +1,25 @@
+---
+// A small flow diagram: boxes joined by arrows. A step is a string; an array is a
+// split into several results. Real ordered list, so screen readers get the sequence.
+// On phones the diagram is hidden and a tap-to-open "Built with" list of the tools is shown instead.
+interface Props { steps: (string | string[])[]; tools: string[] }
+const { steps, tools } = Astro.props;
+---
+
+<ol class="flow" aria-label="How it works">
+  {
+    steps.map((step) =>
+      Array.isArray(step) ? (
+        <li class="fork">
+          <ul class="flow-fork">{step.map((t) => <li><span class="flow-step flow-last">{t}</span></li>)}</ul>
+        </li>
+      ) : (
+        <li><span class="flow-step">{step}</span></li>
+      ),
+    )
+  }
+</ol>
+<details class="tools">
+  <summary>Built with</summary>
+  <p>{tools.join(', ')}</p>
+</details>

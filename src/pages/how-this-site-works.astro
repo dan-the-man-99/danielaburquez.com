@@ -1,0 +1,106 @@
+---
+import Base from '../layouts/Base.astro';
+import SectionBar from '../components/SectionBar.astro';
+import Strip from '../components/Strip.astro';
+import { asOf, built, planned, phase1Title } from '../data/platform-status';
+
+// Why it is built this way. Only what the roadmap already says; "planned" notes are labelled as such.
+const decisions = [
+  { title: 'Static pages, not a server app', text: 'The pages are built ahead of time, so nothing runs per visit. There is far less to attack and to keep patched.' },
+  { title: 'A locked-down container', text: 'It runs as a non-root user with a read-only filesystem and no extra Linux privileges, which limits what a mistake or an attack could do.' },
+  { title: 'A tunnel instead of open ports', text: 'Planned. A Cloudflare Tunnel in front of the cluster, so no ports are opened on my router.' },
+  { title: 'Changes as reviewed commits', text: 'Planned. Argo CD applies what is in Git, so a deploy is a commit someone reviewed, not a manual step.' },
+  { title: 'Nothing listed until it works', text: 'An item moves from planned to built only once it works, and the date at the top changes in the same edit.' },
+];
+---
+
+<Base
+  title="How this site works: Daniel Aburquez"
+  description="The platform behind danielaburquez.com: what is built, the files that show it, and what is still planned."
+>
+  <h1 class="page-title display">How this site works</h1>
+
+  <div class="cells cols-asym">
+    <div>
+      <p class="page-lede">
+        This site is also my DevOps portfolio. The page you're reading is
+        simple on purpose. The platform underneath is the point. Below is what
+        exists, the files that show it, and what is still planned.
+      </p>
+    </div>
+    <div class="progress">
+      <Strip />
+      <p class="progress-count"><strong>{built.length} of {built.length + planned.length}</strong> built and tested on my machine, as of {asOf}.</p>
+    </div>
+  </div>
+
+  <section>
+    <SectionBar label="Roadmap" />
+    <ol class="roadmap">
+      <li class="phase is-built">
+        <div class="phase-head"><span class="phase-n">Phase 1</span><span class="phase-status mono">Built</span></div>
+        <div class="phase-body">
+          <h3>{phase1Title}</h3>
+          <ul class="pieces">
+            {built.map((item) => (
+              <li>
+                <h4>{item.name}</h4>
+                <p>{item.detail}</p>
+                {item.evidence && (
+                  <details class="evidence">
+                    <summary>See the evidence</summary>
+                    {item.evidence.map((block) => (
+                      <figure>
+                        <figcaption class="mono">{block.file}</figcaption>
+                        <pre><code>{block.lines.join('\n')}</code></pre>
+                      </figure>
+                    ))}
+                  </details>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      </li>
+    </ol>
+
+    <!-- Open in the HTML so it works without JavaScript; src/scripts/planned-fold.js folds it on phones. -->
+    <details class="planned-fold" open>
+      <summary>Show {planned.length} planned phases</summary>
+      <ol class="roadmap" start="2">
+        {planned.map((item) => (
+          <li class="phase">
+            <div class="phase-head"><span class="phase-n">Phase {item.phase}</span><span class="phase-status mono">Planned</span></div>
+            <div class="phase-body">
+              <h3>{item.name}</h3>
+              <p>{item.detail}</p>
+            </div>
+          </li>
+        ))}
+      </ol>
+    </details>
+  </section>
+
+  <section>
+    <SectionBar label="Decisions" />
+    <ul class="cells cols-2 decisions">
+      {decisions.map((d) => (
+        <li>
+          <h3>{d.title}</h3>
+          <p>{d.text}</p>
+        </li>
+      ))}
+    </ul>
+  </section>
+
+  <section>
+    <SectionBar label="Next" />
+    <div class="cells cols-asym">
+      <p class="statement display">Questions about any of this, or a project in mind?</p>
+      <div class="email-cell">
+        <p><a class="email-link" href="mailto:hello@danielaburquez.com">hello@<br />danielaburquez.com</a></p>
+        <p class="muted"><a href="/">Back to the main page</a></p>
+      </div>
+    </div>
+  </section>
+</Base>
