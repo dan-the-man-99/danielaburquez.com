@@ -468,15 +468,14 @@ code { font: 0.85em var(--mono); background: var(--rule); padding: 0.1em 0.4em; 
 
 /* ---------- Sticky "Email me" bar: phones only ---------- */
 .mobile-bar {
-  position: fixed; inset-inline: 0; bottom: 0; z-index: 20;
-  padding: 0.5rem var(--pad) calc(0.5rem + env(safe-area-inset-bottom, 0px));
-  background: var(--edge); box-shadow: 0 -1px 0 rgb(244 239 226 / 0.12);
+  /* One button, on the same left and right edges as the page frame (no strip behind it). */
+  position: fixed; inset-inline: var(--margin); bottom: calc(var(--margin) + env(safe-area-inset-bottom, 0px)); z-index: 20;
 }
-.mobile-bar a { display: flex; align-items: center; justify-content: center; min-height: 2.75rem; background: var(--accent); color: var(--edge); font: 500 var(--m1)/1.2 var(--mono); letter-spacing: 0.02em; text-decoration: none; }
+.mobile-bar a { display: flex; align-items: center; justify-content: center; min-height: 2.75rem; background: var(--ground); color: var(--ink); border: 2px solid var(--ink); font: 500 var(--m1)/1.2 var(--mono); letter-spacing: 0.02em; text-decoration: none; }
 .mobile-bar a:focus-visible { outline: 3px solid #f4efe2; outline-offset: 2px; }
 @media (prefers-reduced-motion: no-preference) { .mobile-bar { transition: transform 0.25s ease; } }
-.mobile-bar.is-hidden { transform: translateY(110%); }
-@media (max-width: 47.99rem) { body { padding-bottom: calc(3.75rem + env(safe-area-inset-bottom, 0px)); } }
+.mobile-bar.is-hidden { transform: translateY(calc(100% + 2rem)); }
+@media (max-width: 47.99rem) { body { padding-bottom: calc(3.75rem + var(--margin) + env(safe-area-inset-bottom, 0px)); } }
 @media (min-width: 48rem) { .mobile-bar { display: none; } }
 
 /* ---------- Phones: tighter layout (kept last so it wins the cascade) ---------- */
