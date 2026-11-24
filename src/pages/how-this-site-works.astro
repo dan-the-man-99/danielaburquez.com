@@ -65,11 +65,11 @@ const decisions = [
         exists, the files that show it, and what is still planned.
       </p>
       <p class="page-lede">
-        Where it runs today: visitors are served by Cloudflare Pages. The same
-        hardened container also runs on my home server behind its own tunnel,
-        and a small failover Worker can prefer it and fall back to Pages. I
-        have tested that on a separate test address; visitors to
-        danielaburquez.com are not routed through it yet.
+        Where it runs today: visitors are served by my home server, with
+        Cloudflare Pages as the fallback. The same hardened container runs at
+        home behind its own tunnel, and a small failover Worker in front of
+        danielaburquez.com asks home first and switches to Pages if home does
+        not answer. I tested that by stopping the server on purpose.
       </p>
       <LiveStatus />
       <p class="page-lede">

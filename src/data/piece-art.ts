@@ -82,6 +82,16 @@ export const pieceArt: Record<string, string[]> = {
     ' (container started)',
     ' x-served-by: home',
   ],
+  'Failover on the real address': [
+    ' $ curl -sI danielaburquez.com',
+    ' x-served-by: home',
+    '',
+    ' (home server stopped)',
+    ' x-served-by: pages',
+    '',
+    ' (home server started)',
+    ' x-served-by: home',
+  ],
   'A second copy at home, behind its own tunnel': [
     ' internet',
     '    |',

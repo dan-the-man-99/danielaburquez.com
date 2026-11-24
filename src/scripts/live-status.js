@@ -18,7 +18,7 @@ if (badge || line) {
   const SAYS = {
     home: { badge: 'This page is served by my home server.', line: 'Currently served by my home server' },
     pages: { badge: 'My home server is unreachable, so Cloudflare Pages is serving this page.', line: 'Currently served by Cloudflare Pages (my home server is unreachable)' },
-    direct: { badge: '', line: 'Currently served by Cloudflare Pages directly, not through the Worker yet' },
+    direct: { badge: '', line: 'Currently served by Cloudflare Pages directly, without the failover Worker' },
   };
   let last = null;   // { by: 'home' | 'pages' | 'direct', at: Date.now() }
 

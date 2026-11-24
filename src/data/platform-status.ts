@@ -102,9 +102,18 @@ export const built: Piece[] = [
   {
     phase: 2,
     name: 'Failover to Pages, tested',
-    detail: 'A small Cloudflare Worker asks the home server first, and serves the same page from Cloudflare Pages if home errors or does not answer within two seconds. I tested it on a separate test address by stopping the container, then the tunnel: the page kept loading each time, and went back to home on restart. Visitors to danielaburquez.com are not routed through it yet.',
+    detail: 'A small Cloudflare Worker asks the home server first, and serves the same page from Cloudflare Pages if home errors or does not answer within two seconds. I first tested it on a separate test address by stopping the container, then the tunnel: the page kept loading each time, and went back to home on restart.',
     verify: {
       command: 'curl -sI https://failover-test.danielaburquez.com | grep -i x-served-by',
+      expect: 'Prints "x-served-by: home" normally, and "x-served-by: pages" while the home server is unreachable.',
+    },
+  },
+  {
+    phase: 2,
+    name: 'Failover on the real address',
+    detail: 'danielaburquez.com and www now go through the failover Worker: the home server answers first, and Cloudflare Pages takes over if it does not. I repeated the stop test on the real address, with the container and then the tunnel stopped, and the page kept loading from Pages each time. The Worker is also set to fall straight through to Pages if it ever fails itself.',
+    verify: {
+      command: 'curl -sI https://danielaburquez.com | grep -i x-served-by',
       expect: 'Prints "x-served-by: home" normally, and "x-served-by: pages" while the home server is unreachable.',
     },
   },
@@ -117,7 +126,6 @@ export const built: Piece[] = [
 
 // Phases 2 to 8 of the plan, in order. Each is one piece of work.
 export const planned: Piece[] = [
-  { phase: 2, name: 'Failover on the real address', detail: 'Move danielaburquez.com and www onto the failover Worker, set up so that if the Worker itself fails, traffic falls straight through to Pages.' },
   { phase: 3, name: 'Kubernetes at home', detail: 'k3s on the home server. Held back until that machine has memory to spare: it already runs other services, and Kubernetes on top would push it into swapping.' },
   { phase: 4, name: 'Automated checks and signed images', detail: 'Tests, vulnerability scans and a software bill of materials on every change, with the built image cryptographically signed.' },
   { phase: 5, name: 'GitOps deploys', detail: 'Argo CD applies what is in Git, so a deploy is a reviewed commit rather than a manual step.' },
