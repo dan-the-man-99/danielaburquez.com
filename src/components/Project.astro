@@ -21,6 +21,11 @@ const find = (file?: string) => (file ? shots[`../assets/work/${file}`] : undefi
 const desktop = find(image);
 const phone = find(mobileImage);
 
+// The <picture> is written by hand because phones get a different screenshot, which
+// Astro's <Picture> cannot swap per breakpoint. The images are still optimised with
+// getImage (WebP, srcset). The dev-only data-image-component attribute below is the
+// marker Astro's own components use, so the dev toolbar's "Use the Image component"
+// audit does not flag them. It is not rendered in the production build.
 const desktopSet = desktop && (await getImage({ src: desktop, format: 'webp', widths: [720, 1100, 1440], quality: 82 }));
 const phoneSet = phone && (await getImage({ src: phone, format: 'webp', widths: [390, 664], quality: 82 }));
 const host = new URL(url).host;
@@ -62,6 +67,7 @@ const host = new URL(url).host;
                 alt={alt}
                 loading="lazy"
                 decoding="async"
+                data-image-component={import.meta.env.DEV ? 'true' : undefined}
               />
             </picture>
           </a>
