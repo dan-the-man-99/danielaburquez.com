@@ -1,0 +1,13 @@
+---
+// Live badge: which side is serving this page right now. Hidden until the failover
+// Worker's x-served-by header is seen (see src/scripts/live-status.js).
+---
+
+<p class="live mono" data-live hidden role="status">
+  <span class="live-dot" aria-hidden="true"></span>
+  <span data-live-text></span>
+</p>
+
+<script>
+  import '../scripts/live-status.js';
+</script>

@@ -1,0 +1,98 @@
+// ASCII art shown in the left column of /how-this-site-works beside each built piece
+// (pinned while that piece is on screen, swapped as you scroll). Keyed by the piece's
+// `name` in platform-status.ts. It may only draw what is true: the lines come from the
+// same evidence the page shows. ASCII only, at most MAX_COLS wide so it fits the column
+// (`npm run check:evidence` enforces both this and that every built piece has art).
+// A planned piece gets a dotted "planned" frame made on the page, never art from here.
+export const MAX_COLS = 36;
+
+export const pieceArt: Record<string, string[]> = {
+  'Static site, no moving parts': [
+    ' source           built once',
+    ' +-------+        +-----------+',
+    ' | pages | build> | html      |',
+    ' | style |------> | css  js   |',
+    ' +-------+        | images    |',
+    '                  +-----------+',
+    ' a visit = a file served.',
+    ' no code runs per request.',
+  ],
+  'Hardened container': [
+    ' +-- container ----------------+',
+    ' | user          101, not root |',
+    ' | filesystem    read-only     |',
+    ' | capabilities  none          |',
+    ' | escalation    blocked       |',
+    ' | memory        64 MB max     |',
+    ' | processes     100 max       |',
+    ' +-----------------------------+',
+    '   the flags from docker run',
+  ],
+  'Strict browser security headers': [
+    ' every response carries:',
+    ' +-----------------------------+',
+    ' | content-security-policy     |',
+    ' |   default-src \'self\'        |',
+    ' | strict-transport-security   |',
+    ' | x-content-type-options      |',
+    ' |   nosniff                   |',
+    ' | x-frame-options  DENY       |',
+    ' +-----------------------------+',
+  ],
+  'Secret scanning before every commit': [
+    ' git commit',
+    '     |',
+    '     v',
+    ' +-----------------+',
+    ' | pre-commit hook |',
+    ' | gitleaks scan   |',
+    ' +--------+--------+',
+    '          |',
+    '  key or token inside?',
+    '   yes /        \\ no',
+    ' BLOCKED     committed',
+  ],
+  'Pinned versions': [
+    ' Dockerfile',
+    '   node:22.23.5-alpine',
+    '   nginx-unprivileged:1.30.6-alpine',
+    '',
+    ' package-lock.json',
+    '   npm ci -> exact versions',
+    '',
+    ' same inputs, same build.',
+  ],
+  'DNS as code': [
+    ' Terraform files    Cloudflare zone',
+    ' +------------+     +------------+',
+    ' | 8 records  | <=> | 8 records  |',
+    ' +------------+     +------------+',
+    '',
+    ' $ terraform plan',
+    ' No changes.',
+    ' files and live zone agree',
+  ],
+  'Failover to Pages, tested': [
+    ' $ curl -sI failover-test...',
+    ' x-served-by: home',
+    '',
+    ' (container stopped)',
+    ' x-served-by: pages',
+    '',
+    ' (container started)',
+    ' x-served-by: home',
+  ],
+  'A second copy at home, behind its own tunnel': [
+    ' internet',
+    '    |',
+    ' Cloudflare',
+    '    ^',
+    '    | tunnel: dials out only',
+    '    |',
+    ' +--+--------------+',
+    ' | site container  |',
+    ' | publishes no    |',
+    ' | ports           |',
+    ' +-----------------+',
+  ],
+};

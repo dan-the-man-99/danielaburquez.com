@@ -377,7 +377,7 @@ a:focus-visible, button:focus-visible { outline-offset: 2px; }
 
 /* ---------- Built step by step: a strip of the platform's pieces, built first ---------- */
 .progress { display: grid; gap: var(--s1); }
-.strip { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(12, 1fr); gap: 0.35rem; }
+.strip { list-style: none; margin: 0; padding: 0; display: grid; grid-auto-flow: column; grid-auto-columns: 1fr; gap: 0.35rem; }   /* one row, whatever the number of pieces */
 .strip li { height: 2.75rem; border: 1px solid var(--ink); }
 .strip li.is-built { background: var(--ink); }
 .progress-foot { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: var(--s0) var(--s1); }
@@ -423,21 +423,41 @@ a:focus-visible, button:focus-visible { outline-offset: 2px; }
 code { font: 0.85em var(--mono); background: var(--rule); padding: 0.1em 0.4em; }
 
 /* The roadmap: one ordered list of phases. A built phase is a solid block; planned ones are quiet. */
-.roadmap { list-style: none; margin: 0; padding: 0; }
-.phase { display: grid; gap: var(--s0) var(--s2); padding: var(--s2) var(--pad); border-bottom: 1px solid var(--rule); }
+/* Every phase is its own outlined card with a gap between: solid for phases with built work,
+   dashed for phases that are only planned. */
+.roadmap { list-style: none; margin: 0; display: grid; gap: var(--s0); padding: var(--s0) var(--pad); }
+.planned-fold .roadmap { padding-top: 0; }   /* the gap above comes from the list before it */
+.phase { display: grid; gap: var(--s0) var(--s2); padding: var(--s1); border: 1px dashed var(--rule); }
 .phase-head { display: flex; align-items: baseline; gap: var(--s0); }
 .phase-n { font: 800 var(--t-mid)/1 var(--display); font-stretch: 125%; letter-spacing: -0.02em; }
-.phase-status { color: var(--muted); }
-.phase.is-built .phase-status { color: var(--ink); font-weight: 600; }
+/* The status is a small tag: filled = built, outlined = in progress, dashed = planned. */
+.phase-status { padding: 0.1rem 0.5rem; border: 1px dashed var(--muted); color: var(--muted); }
+.phase-status.is-progress { border: 1px solid var(--ink); color: var(--ink); }
+.phase-status.is-done { border: 1px solid var(--ink); background: var(--ink); color: var(--ground); }
 .phase-body h3 { font: 560 clamp(1.3rem, 2.4vw, 1.6rem)/1.2 var(--serif); letter-spacing: -0.012em; margin-bottom: 0.5rem; }
 .phase-body p { margin: 0; max-width: 40rem; }
 .phase:not(.is-built) .phase-body p { color: var(--muted); }
 .phase:not(.is-built) .phase-n { font-weight: 500; opacity: 0.7; }
 @media (min-width: 48rem) {
   .phase { grid-template-columns: 1fr 1.618fr; }   /* label 38.2 / content 61.8 */
-  .phase-head { align-self: start; position: sticky; top: calc(var(--margin) + var(--s0)); }   /* the label stays in view down a long phase */
+  .phase-side { align-self: start; position: sticky; top: calc(var(--margin) + var(--s0)); }   /* the label and the picture stay in view down a long phase */
+
+  /* The picture beside the pieces (piece-art.js swaps it). All of a phase's pictures sit in
+     one grid cell, so the box is as tall as the tallest and nothing jumps; only the active one
+     is visible. The type size follows the box width so ~38 columns always fit. */
+  .piece-art-box { display: grid; container-type: inline-size; margin-top: var(--s1); }
+  .piece-art { grid-area: 1 / 1; margin: 0; overflow: hidden; visibility: hidden; white-space: pre; color: var(--ink); font: 500 clamp(7px, 3.7cqw, 13px)/1.3 var(--mono); }
+  .piece-art.is-active { visibility: visible; }
+  .piece-art.is-planned { color: var(--muted); }
+  .piece-art .ln { display: block; }
+  @media (prefers-reduced-motion: no-preference) {
+    .piece-art.is-active .ln { animation: ln-in 0.25s ease-out both; animation-delay: calc(var(--i, 0) * 45ms); }
+  }
 }
-.phase.is-built { background: var(--ground); border-left: 0.5rem solid var(--ink); padding-left: calc(var(--pad) - 0.5rem); }
+@keyframes ln-in { from { opacity: 0; transform: translateX(-0.5em); } }
+/* Phones: no picture (an ASCII drawing needs a wide column); the label stays. */
+@media (max-width: 47.99rem) { .piece-art-box { display: none; } }
+.phase.is-built { background: var(--ground); border: 1px solid var(--ink); }
 
 .pieces { list-style: none; margin: var(--s0) 0 0; padding: 0; }
 .pieces > li { padding: var(--s1) 0; border-top: 1px solid var(--rule); }
@@ -455,9 +475,31 @@ code { font: 0.85em var(--mono); background: var(--rule); padding: 0.1em 0.4em; 
 .evidence figcaption { padding: 0.35rem 0.75rem; background: var(--ink); color: var(--ground); }
 .evidence pre { margin: 0; padding: 0.75rem; overflow-x: auto; font: 500 var(--m0)/1.6 var(--mono); white-space: pre-wrap; overflow-wrap: normal; }   /* wraps at spaces only; a long flag scrolls instead of breaking mid-word */
 .evidence code { font: inherit; background: none; padding: 0; }
+.verify-note { margin: var(--s-1) 0 0; font-size: 1rem; }   /* what the command should print */
+
+/* Live badge (live-status.js): filled dot = served from home, hollow dot = Pages is covering. */
+.live { display: flex; align-items: flex-start; gap: 0.7rem; margin: var(--s1) 0 var(--s0); padding: 0.7rem 0.9rem; border: 1px solid var(--ink); font-size: var(--m1); line-height: 1.45; max-width: 40rem; }
+.live[hidden] { display: none; }
+.live-dot { flex: none; width: 0.8rem; height: 0.8rem; margin-top: 0.3rem; border: 2px solid var(--ink); border-radius: 50%; }
+.live[data-state='home'] .live-dot { background: var(--ink); }
+@media (prefers-reduced-motion: no-preference) { .live[data-state='home'] .live-dot { animation: live-pulse 2.4s ease-in-out infinite; } }
+@keyframes live-pulse { 50% { opacity: 0.35; } }
+
+/* The request path: ASCII art (a wide drawing, and a tall one on phones). */
+.path-section { display: block; }
+.path { margin: 0; padding: var(--s1) var(--pad) var(--s2); border-bottom: 1px solid var(--rule); }
+.path-art { margin: 0; overflow-x: auto; font: 500 clamp(0.6rem, 1.05vw, 0.82rem)/1.25 var(--mono); white-space: pre; color: var(--ink); }
+.path figcaption { margin: var(--s0) 0 0; max-width: 44rem; color: var(--muted); font-size: 1rem; }
+.path-live { display: block; margin-top: 0.4rem; color: var(--ink); font: 500 var(--m1)/1.5 var(--mono); }   /* the live line stands out from the explanation */
+/* Phones get the tall drawing (36 columns): the type size follows the box width so it always fits. */
+.path-art-box { container-type: inline-size; }
+@media (max-width: 47.99rem) { .path-art { font-size: clamp(8px, 3.9cqw, 16px); } }
+/* A planned piece inside a phase that already has built ones: same list, muted, with a tag */
+.pieces > li.is-planned h4, .pieces > li.is-planned p { color: var(--muted); }
+.piece-tag { display: inline-block; margin-left: 0.5rem; padding: 0.1rem 0.45rem; border: 1px solid var(--muted); font: 500 var(--m0)/1.4 var(--mono); vertical-align: 0.1em; }
 
 /* Planned phases: always open on tablet and up; on phones a toggle (planned-fold.js) folds them away */
-.planned-fold summary { display: none; padding: 0 var(--pad); border-bottom: 1px solid var(--rule); }
+.planned-fold summary { display: none; margin: 0 var(--pad); padding: 0 var(--s0); border: 1px dashed var(--rule); }
 @media (max-width: 47.99rem) { .planned-fold summary { display: flex; } }
 
 /* Decisions: five notes in two columns, so the last one spans the row */
@@ -470,8 +512,11 @@ code { font: 0.85em var(--mono); background: var(--rule); padding: 0.1em 0.4em; 
 .mobile-bar {
   /* One button, on the same left and right edges as the page frame (no strip behind it). */
   position: fixed; inset-inline: var(--margin); bottom: calc(var(--margin) + env(safe-area-inset-bottom, 0px)); z-index: 20;
+  /* Sized to its label, on the right: within thumb reach, and clear of the left-aligned text.
+     The bar itself ignores taps so only the button is tappable. */
+  display: flex; justify-content: flex-end; pointer-events: none;
 }
-.mobile-bar a { display: flex; align-items: center; justify-content: center; min-height: 2.75rem; background: var(--ground); color: var(--ink); border: 2px solid var(--ink); font: 500 var(--m1)/1.2 var(--mono); letter-spacing: 0.02em; text-decoration: none; }
+.mobile-bar a { pointer-events: auto; display: flex; align-items: center; justify-content: center; min-height: 2.25rem; padding-inline: 1.1rem; background: var(--ground); color: var(--ink); border: 2px solid var(--ink); font: 500 var(--m1)/1.2 var(--mono); letter-spacing: 0.02em; text-decoration: none; }
 .mobile-bar a:focus-visible { outline: 3px solid #f4efe2; outline-offset: 2px; }
 @media (prefers-reduced-motion: no-preference) { .mobile-bar { transition: transform 0.25s ease; } }
 .mobile-bar.is-hidden { transform: translateY(calc(100% + 2rem)); }
@@ -483,6 +528,13 @@ code { font: 0.85em var(--mono); background: var(--rule); padding: 0.1em 0.4em; 
   /* automation flows: no diagram on phones, just a plain list of what each one uses */
   .flow { display: none; }
   .tools { display: block; }
+  /* the three automations: separate outlined cards with a gap, not one block split by hairlines */
+  .cells.cols-3 { gap: var(--s0); background: var(--ground); padding: var(--s0); border-bottom: 0; }
+  .cells.cols-3 > .case { border: 1px solid var(--ink); padding: var(--s0); }
+  /* phase cards: tighter margins and padding so the text column stays wide enough */
+  .roadmap { padding-inline: var(--s0); }
+  .phase { padding: var(--s0); }
+  .planned-fold summary { margin-inline: var(--s0); }
   /* paired cells read as one: the statement and its supporting text share a cell */
   .cols-hero, .cols-asym { gap: 0; background: var(--ground); }
   .cols-hero > :first-child, .cols-asym > :first-child { padding-bottom: var(--s0); }

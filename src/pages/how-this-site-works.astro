@@ -2,13 +2,50 @@
 import Base from '../layouts/Base.astro';
 import SectionBar from '../components/SectionBar.astro';
 import Strip from '../components/Strip.astro';
-import { asOf, built, planned, phase1Title } from '../data/platform-status';
+import RequestPath from '../components/RequestPath.astro';
+import LiveStatus from '../components/LiveStatus.astro';
+import { pieceArt } from '../data/piece-art';
+import { asOf, built, planned, phaseTitles } from '../data/platform-status';
+
+// One entry per phase, holding its built and planned pieces. A phase can be both.
+const phases = [...new Set([...built, ...planned].map((p) => p.phase))]
+  .sort((a, b) => a - b)
+  .map((n) => ({
+    n,
+    title: phaseTitles[n],
+    done: built.filter((p) => p.phase === n),
+    todo: planned.filter((p) => p.phase === n),
+  }));
+const started = phases.filter((p) => p.done.length > 0);
+const notStarted = phases.filter((p) => p.done.length === 0);
+// A dotted "planned" frame for a piece that is not built yet: its name, wrapped, in a box.
+function plannedArt(name: string): string[] {
+  const words = name.split(' ');
+  const rows: string[] = [];
+  let row = '';
+  for (const w of words) {
+    if ((row + ' ' + w).trim().length > 26) { rows.push(row); row = w; } else row = (row + ' ' + w).trim();
+  }
+  if (row) rows.push(row);
+  const pad = (t: string) => ' : ' + t.padEnd(26) + ' :';   // 31 columns, same as the edges
+  const edge = ' ' + '.'.repeat(30);
+  return [edge, pad(''), ...rows.map(pad), pad(''), pad('planned, not built yet'), edge];
+}
+// All the art for one phase, in piece order (built pieces first, then planned ones).
+const artFor = (phase: (typeof phases)[number]) => [
+  ...phase.done.map((p) => ({ name: p.name, lines: pieceArt[p.name] ?? plannedArt(p.name), planned: false })),
+  ...phase.todo.map((p) => ({ name: p.name, lines: plannedArt(p.name), planned: true })),
+];
+const statusOf = (p: (typeof phases)[number]) => (p.todo.length === 0 ? 'Built' : 'In progress');
 
 // Why it is built this way. Only what the roadmap already says; "planned" notes are labelled as such.
 const decisions = [
   { title: 'Static pages, not a server app', text: 'The pages are built ahead of time, so nothing runs per visit. There is far less to attack and to keep patched.' },
   { title: 'A locked-down container', text: 'It runs as a non-root user with a read-only filesystem and no extra Linux privileges, which limits what a mistake or an attack could do.' },
-  { title: 'A tunnel instead of open ports', text: 'Planned. A Cloudflare Tunnel in front of the cluster, so no ports are opened on my router.' },
+  { title: 'A tunnel instead of open ports', text: 'The copy at home publishes no ports. A Cloudflare Tunnel, which only dials out, is the one way in, and it is separate from the tunnel my other home services use.' },
+  { title: 'Home first, Pages as the fallback', text: 'The home server is the primary host and Cloudflare Pages is the safety net, because a fallback only means something when there is a primary to fall back from.' },
+  { title: 'Plain Docker before Kubernetes', text: 'The home server is already busy, and Kubernetes on top would push it into swapping. So the container runs on plain Docker for now, and Kubernetes waits until there is memory for it.' },
+  { title: 'Leave Cloudflare\'s own records alone', text: 'Terraform owns the records that never change. The email signing key belongs to Cloudflare, which may rotate it, so managing it by hand would break outgoing mail the day it does.' },
   { title: 'Changes as reviewed commits', text: 'Planned. Argo CD applies what is in Git, so a deploy is a commit someone reviewed, not a manual step.' },
   { title: 'Nothing listed until it works', text: 'An item moves from planned to built only once it works, and the date at the top changes in the same edit.' },
 ];
@@ -28,60 +65,90 @@ const decisions = [
         exists, the files that show it, and what is still planned.
       </p>
       <p class="page-lede">
-        Where it runs today: the same static files are served by Cloudflare
-        Pages with the same security headers. The hardened container is built
-        and tested on my machine, and does not serve visitors yet.
+        Where it runs today: visitors are served by Cloudflare Pages. The same
+        hardened container also runs on my home server behind its own tunnel,
+        and a small failover Worker can prefer it and fall back to Pages. I
+        have tested that on a separate test address; visitors to
+        danielaburquez.com are not routed through it yet.
       </p>
+      <LiveStatus />
       <p class="page-lede">
         <a href="https://github.com/dan-the-man-99/danielaburquez.com" target="_blank" rel="noopener">Read the source on GitHub<span class="sr-only"> (opens in a new tab)</span></a>
       </p>
     </div>
     <div class="progress">
       <Strip />
-      <p class="progress-count"><strong>{built.length} of {built.length + planned.length}</strong> built and tested on my machine, as of {asOf}.</p>
+      <p class="progress-count"><strong>{built.length} of {built.length + planned.length}</strong> built and tested, as of {asOf}.</p>
     </div>
   </div>
+
+  <RequestPath />
 
   <section>
     <SectionBar label="Roadmap" />
     <ol class="roadmap">
-      <li class="phase is-built">
-        <div class="phase-head"><span class="phase-n">Phase 1</span><span class="phase-status mono">Built</span></div>
-        <div class="phase-body">
-          <h3>{phase1Title}</h3>
-          <ul class="pieces">
-            {built.map((item) => (
-              <li>
-                <h4>{item.name}</h4>
-                <p>{item.detail}</p>
-                {item.evidence && (
-                  <details class="evidence">
-                    <summary>See the evidence</summary>
-                    {item.evidence.map((block) => (
+      {started.map((phase) => (
+        <li class="phase is-built">
+          <div class="phase-side">
+            <div class="phase-head"><span class="phase-n">Phase {phase.n}</span><span class={`phase-status mono ${phase.todo.length === 0 ? 'is-done' : 'is-progress'}`}>{statusOf(phase)}</span></div>
+            <div class="piece-art-box" aria-hidden="true">
+              {artFor(phase).map((a, i) => (
+                <pre class={`piece-art${a.planned ? ' is-planned' : ''}${i === 0 ? ' is-active' : ''}`} data-art={i}>{a.lines.map((l) => <span class="ln">{l || ' '}</span>)}</pre>
+              ))}
+            </div>
+          </div>
+          <div class="phase-body">
+            <h3>{phase.title}</h3>
+            <ul class="pieces" data-pieces>
+              {phase.done.map((item, i) => (
+                <li data-piece={i}>
+                  <h4>{item.name}</h4>
+                  <p>{item.detail}</p>
+                  {item.evidence && (
+                    <details class="evidence">
+                      <summary>See the evidence</summary>
+                      {item.evidence.map((block) => (
+                        <figure>
+                          <figcaption class="mono">{block.file}</figcaption>
+                          <pre><code>{block.lines.join('\n')}</code></pre>
+                        </figure>
+                      ))}
+                    </details>
+                  )}
+                  {item.verify && (
+                    <details class="evidence">
+                      <summary>Check it yourself</summary>
                       <figure>
-                        <figcaption class="mono">{block.file}</figcaption>
-                        <pre><code>{block.lines.join('\n')}</code></pre>
+                        <figcaption class="mono">Run in a terminal</figcaption>
+                        <pre><code>{item.verify.command}</code></pre>
                       </figure>
-                    ))}
-                  </details>
-                )}
-              </li>
-            ))}
-          </ul>
-        </div>
-      </li>
+                      <p class="verify-note">{item.verify.expect}</p>
+                    </details>
+                  )}
+                </li>
+              ))}
+              {phase.todo.map((item, i) => (
+                <li class="is-planned" data-piece={phase.done.length + i}>
+                  <h4>{item.name} <span class="piece-tag mono">Planned</span></h4>
+                  <p>{item.detail}</p>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </li>
+      ))}
     </ol>
 
     <!-- Open in the HTML so it works without JavaScript; src/scripts/planned-fold.js folds it on phones. -->
     <details class="planned-fold" open>
-      <summary>Show {planned.length} planned phases</summary>
-      <ol class="roadmap" start="2">
-        {planned.map((item) => (
+      <summary>Show {notStarted.length} planned phases</summary>
+      <ol class="roadmap" start={notStarted[0]?.n}>
+        {notStarted.map((phase) => (
           <li class="phase">
-            <div class="phase-head"><span class="phase-n">Phase {item.phase}</span><span class="phase-status mono">Planned</span></div>
+            <div class="phase-head"><span class="phase-n">Phase {phase.n}</span><span class="phase-status mono">Planned</span></div>
             <div class="phase-body">
-              <h3>{item.name}</h3>
-              <p>{item.detail}</p>
+              <h3>{phase.title}</h3>
+              {phase.todo.map((item) => <p>{item.detail}</p>)}
             </div>
           </li>
         ))}
@@ -112,3 +179,7 @@ const decisions = [
     </div>
   </section>
 </Base>
+
+<script>
+  import '../scripts/piece-art.js';
+</script>

@@ -1,0 +1,28 @@
+---
+// The request path as ASCII art, drawn by src/scripts/request-path.js: a wide drawing on
+// tablets and up, a tall one on phones. The caption under it is a live line (live-status.js).
+import SectionBar from './SectionBar.astro';
+---
+
+<section class="path-section" id="request-path">
+  <SectionBar label="The request path" tag="tested" />
+  <figure class="path">
+    <div class="path-art-box"><pre class="path-art" data-request-path aria-hidden="true"></pre></div>
+    <p class="sr-only">
+      Diagram. A visitor's request reaches a Cloudflare Worker, which asks the home
+      server first. If the home server does not answer within two seconds, the Worker
+      serves the same page from Cloudflare Pages instead. When the home server comes
+      back, requests go to it again.
+    </p>
+    <figcaption>
+      How a request flows when danielaburquez.com goes through the Worker. I tested this
+      loop on a separate test address by stopping the container and then the tunnel.
+      <span class="path-live" data-live-line>Today, visitors are served by Cloudflare Pages directly.</span>
+    </figcaption>
+  </figure>
+</section>
+
+<script>
+  import '../scripts/request-path.js';
+  import '../scripts/live-status.js';
+</script>

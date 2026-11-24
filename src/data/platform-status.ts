@@ -8,7 +8,10 @@
 export const asOf = '24 November 2026';
 
 export interface Evidence { file: string; lines: string[] }
-export interface Piece { phase: number; name: string; detail: string; evidence?: Evidence[] }
+// `verify` is for pieces whose source lives in a private repository: instead of file
+// excerpts, a command anyone can run against the live site, and what it should show.
+export interface Verify { command: string; expect: string }
+export interface Piece { phase: number; name: string; detail: string; evidence?: Evidence[]; verify?: Verify }
 
 export const built: Piece[] = [
   {
@@ -91,12 +94,31 @@ export const built: Piece[] = [
       },
     ],
   },
+  {
+    phase: 2,
+    name: 'DNS as code',
+    detail: 'The Cloudflare DNS records for this domain are described in Terraform, in a private repository, and each was imported as it already was. Comparing the files with the live zone reports no differences. Records that Cloudflare itself owns, such as the email signing key, are left out on purpose, so the two never fight over them.',
+  },
+  {
+    phase: 2,
+    name: 'Failover to Pages, tested',
+    detail: 'A small Cloudflare Worker asks the home server first, and serves the same page from Cloudflare Pages if home errors or does not answer within two seconds. I tested it on a separate test address by stopping the container, then the tunnel: the page kept loading each time, and went back to home on restart. Visitors to danielaburquez.com are not routed through it yet.',
+    verify: {
+      command: 'curl -sI https://failover-test.danielaburquez.com | grep -i x-served-by',
+      expect: 'Prints "x-served-by: home" normally, and "x-served-by: pages" while the home server is unreachable.',
+    },
+  },
+  {
+    phase: 3,
+    name: 'A second copy at home, behind its own tunnel',
+    detail: 'The same hardened container also runs on my home server. It publishes no ports and is reached only through a dedicated Cloudflare Tunnel, kept separate from the one my other home services use, so a mistake here cannot take them down.',
+  },
 ];
 
 // Phases 2 to 8 of the plan, in order. Each is one piece of work.
 export const planned: Piece[] = [
-  { phase: 2, name: 'DNS and failover as code', detail: 'Cloudflare configuration in Terraform, with a static fallback if the home server is down.' },
-  { phase: 3, name: 'Kubernetes at home', detail: 'k3s with a Cloudflare Tunnel, so no ports are opened on my router.' },
+  { phase: 2, name: 'Failover on the real address', detail: 'Move danielaburquez.com and www onto the failover Worker, set up so that if the Worker itself fails, traffic falls straight through to Pages.' },
+  { phase: 3, name: 'Kubernetes at home', detail: 'k3s on the home server. Held back until that machine has memory to spare: it already runs other services, and Kubernetes on top would push it into swapping.' },
   { phase: 4, name: 'Automated checks and signed images', detail: 'Tests, vulnerability scans and a software bill of materials on every change, with the built image cryptographically signed.' },
   { phase: 5, name: 'GitOps deploys', detail: 'Argo CD applies what is in Git, so a deploy is a reviewed commit rather than a manual step.' },
   { phase: 6, name: 'Cluster hardening', detail: 'Admission policies, network policies, restricted pod security and encrypted secrets.' },
@@ -104,5 +126,14 @@ export const planned: Piece[] = [
   { phase: 8, name: 'A tested rebuild', detail: 'Backups, and a timed destroy-and-rebuild drill, published with the real result.' },
 ];
 
-// What phase 1 is called on the roadmap (the later phases are named by their one piece).
-export const phase1Title = 'The site and its container';
+// What each phase is called on the roadmap. A phase can hold built and planned pieces at once.
+export const phaseTitles: Record<number, string> = {
+  1: 'The site and its container',
+  2: 'DNS and failover as code',
+  3: 'The home server behind a tunnel',
+  4: 'Automated checks and signed images',
+  5: 'GitOps deploys',
+  6: 'Cluster hardening',
+  7: 'Monitoring and a public status page',
+  8: 'A tested rebuild',
+};
