@@ -489,6 +489,10 @@ code { font: 0.85em var(--mono); background: var(--rule); padding: 0.1em 0.4em; 
   .cols-hero > :last-child, .cols-asym > :last-child { padding-top: 0; }
   /* the contact email: two lines, large, a real tap target */
   .email { display: inline-block; padding-block: 0.5rem; font-size: 6.2cqw; line-height: 1.2; }
+  /* The hero is the whole first screen: the top bar, the pinned nav strip and the Email me
+     button are all that share it, so nothing from the next section peeks in underneath. */
+  .hero { display: flex; flex-direction: column; min-height: calc(100svh - 7.5rem - var(--margin)); padding-bottom: calc(2.75rem + 2 * var(--margin)); }   /* the bottom padding keeps the button clear of the Email me bar */
+  .hero .cols-hero { flex: 1; align-content: space-evenly; }
 }
 @media (min-width: 48rem) { .br-phone { display: none; } }
 
