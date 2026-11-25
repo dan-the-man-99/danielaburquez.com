@@ -2,7 +2,7 @@
 
 # ---- Stage 1: build -------------------------------------------------------
 # The "kitchen": has Node, npm and every build dependency. None of it ships.
-FROM node:22.23.5-alpine AS build
+FROM node:26.13.1-alpine AS build
 WORKDIR /app
 
 # Copy only the dependency manifests first. Docker caches each step, so
