@@ -55,7 +55,7 @@ export const pieceArt: Record<string, string[]> = {
   'Pinned versions': [
     ' Dockerfile',
     '   node:22.23.5-alpine',
-    '   nginx-unprivileged:1.30.6-alpine',
+    '   nginx-unprivileged:1.31.7-alpine',
     '',
     ' package-lock.json',
     '   npm ci -> exact versions',

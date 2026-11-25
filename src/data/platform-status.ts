@@ -24,7 +24,7 @@ export const built: Piece[] = [
         lines: [
           'RUN npm run build',
           '…',
-          'FROM nginxinc/nginx-unprivileged:1.30.6-alpine',
+          'FROM nginxinc/nginx-unprivileged:1.31.7-alpine',
           'COPY --from=build /app/dist /usr/share/nginx/html',
         ],
       },
@@ -89,7 +89,7 @@ export const built: Piece[] = [
           '…',
           'RUN npm ci',
           '…',
-          'FROM nginxinc/nginx-unprivileged:1.30.6-alpine',
+          'FROM nginxinc/nginx-unprivileged:1.31.7-alpine',
         ],
       },
     ],
