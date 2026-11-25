@@ -5,7 +5,7 @@
 // `evidence` excerpts are copied word for word from files in this repo. Run
 // `npm run check:evidence` after editing any of those files: it fails if an excerpt no
 // longer matches. A line that is only "…" marks skipped lines.
-export const asOf = '24 November 2026';
+export const asOf = '25 November 2026';
 
 export interface Evidence { file: string; lines: string[] }
 // `verify` is for pieces whose source lives in a private repository: instead of file
@@ -122,12 +122,36 @@ export const built: Piece[] = [
     name: 'A second copy at home, behind its own tunnel',
     detail: 'The same hardened container also runs on my home server. It publishes no ports and is reached only through a dedicated Cloudflare Tunnel, kept separate from the one my other home services use, so a mistake here cannot take them down.',
   },
+  {
+    phase: 4,
+    name: 'Automated checks on every change',
+    detail: 'Every push to main runs the build, the evidence, header and search checks, and an audit of the dependencies, on a clean machine. A pull request that breaks any of them shows a red cross. It already caught one: a bot proposed a newer base image and the evidence check failed because the page quoted the old line.',
+    evidence: [
+      { file: '.github/workflows/ci.yml', lines: ['- run: npm run check:evidence', '- run: npm run check:headers', '- run: npm run check:seo', '- run: npm audit --omit=dev --audit-level=high'] },
+    ],
+  },
+  {
+    phase: 4,
+    name: 'Image scanned, with a parts list',
+    detail: 'Before an image is published it is scanned for known vulnerabilities, and a fixable high or critical finding stops the build. This worked on the first run: it found 20 in the base image and published nothing, until I updated the base and applied the pending fixes. Each published image also gets a software bill of materials, the list of everything inside it.',
+    evidence: [
+      { file: '.github/workflows/ci.yml', lines: ['severity: HIGH,CRITICAL', "exit-code: '1'", 'format: spdx-json'] },
+    ],
+  },
+  {
+    phase: 4,
+    name: 'Signed image, checked before it runs',
+    detail: 'CI signs each image with a short-lived certificate tied to this repository and branch, so there is no signing key to steal. The home server checks that signature, and refuses to start anything that fails it, before it runs the image. This replaced rebuilding the home copy by hand, so the two copies can no longer drift apart.',
+    verify: {
+      command: 'docker run --rm gcr.io/projectsigstore/cosign:v3.1.5 verify ghcr.io/dan-the-man-99/danielaburquez-site:latest --certificate-identity https://github.com/dan-the-man-99/danielaburquez.com/.github/workflows/ci.yml@refs/heads/main --certificate-oidc-issuer https://token.actions.githubusercontent.com',
+      expect: 'Lists the checks that passed and the image digest. Change the identity to anything else and it is rejected.',
+    },
+  },
 ];
 
 // Phases 2 to 8 of the plan, in order. Each is one piece of work.
 export const planned: Piece[] = [
   { phase: 3, name: 'Kubernetes at home', detail: 'k3s on the home server. Held back until that machine has memory to spare: it already runs other services, and Kubernetes on top would push it into swapping.' },
-  { phase: 4, name: 'Automated checks and signed images', detail: 'Tests, vulnerability scans and a software bill of materials on every change, with the built image cryptographically signed.' },
   { phase: 5, name: 'GitOps deploys', detail: 'Argo CD applies what is in Git, so a deploy is a reviewed commit rather than a manual step.' },
   { phase: 6, name: 'Cluster hardening', detail: 'Admission policies, network policies, restricted pod security and encrypted secrets.' },
   { phase: 7, name: 'Monitoring and a public status page', detail: 'Metrics, logs and alerts, with a status page that stays up when the home server does not.' },
