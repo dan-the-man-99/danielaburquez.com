@@ -17,7 +17,7 @@ RUN npm run build
 # The "dining room": nginx and the finished HTML/CSS, nothing else.
 # nginx-unprivileged runs as uid 101 (not root) and listens on 8080, because
 # non-root processes can't bind ports below 1024.
-FROM nginxinc/nginx-unprivileged:1.30.6-alpine
+FROM nginxinc/nginx-unprivileged:1.31.7-alpine
 
 COPY nginx.conf /etc/nginx/nginx.conf
 COPY security-headers.conf /etc/nginx/security-headers.conf
