@@ -1,4 +1,4 @@
-// Keep this list honest (see platform/docs/brand-philosophy.md): an item moves
+// Keep this list honest (only what is live and verifiable): an item moves
 // from `planned` to `built` only once it works, and the date below is updated
 // in the same change. The homepage strip and /how-this-site-works both read this file.
 //

@@ -54,6 +54,14 @@ const decisions = [
 <Base
   title="How this site works: Daniel Aburquez"
   description="The platform behind danielaburquez.com: what is built, the files that show it, and what is still planned."
+  schema={{
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: 'How this site works',
+    url: 'https://danielaburquez.com/how-this-site-works',
+    isPartOf: { '@id': 'https://danielaburquez.com/#website' },
+    author: { '@id': 'https://danielaburquez.com/#dan' },
+  }}
 >
   <h1 class="page-title display">How this site works</h1>
 

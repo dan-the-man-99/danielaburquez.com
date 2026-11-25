@@ -1,0 +1,103 @@
+# CI for the site: prove it is correct, build the container, scan it, record
+# what is inside it (SBOM), and sign it so the home server can verify where it
+# came from. Every third-party action is pinned to a full commit SHA (the tag in
+# the comment is for humans): a moved tag can't change what runs here.
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least privilege by default; the image job asks for more, only for itself.
+permissions:
+  contents: read
+
+env:
+  IMAGE: ghcr.io/dan-the-man-99/danielaburquez-site
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 22.23.5  # same as the Dockerfile build stage
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+      - run: npm run check:evidence
+      - run: npm run check:headers
+      - run: npm run check:seo
+      # Known-vulnerable runtime dependencies fail the build.
+      - run: npm audit --omit=dev --audit-level=high
+
+  image:
+    # Only after tests pass, and only for main (never for pull requests).
+    needs: test
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write   # push the image to GHCR
+      id-token: write   # lets cosign sign with this run's identity (no stored key)
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # 1. Build once locally and scan BEFORE anything is published.
+      - name: Build (local, for scanning)
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          load: true
+          tags: ${{ env.IMAGE }}:scan
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Scan image for vulnerabilities
+        uses: aquasecurity/trivy-action@ed142fd0673e97e23eac54620cfb913e5ce36c25 # v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE }}:scan
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true   # only things that have a fix available
+          exit-code: '1'
+
+      # 2. Publish, tagged with the commit it was built from.
+      - name: Push
+        id: push
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:sha-${{ github.sha }}
+            ${{ env.IMAGE }}:latest
+          cache-from: type=gha
+
+      # 3. SBOM: the list of every package inside the image.
+      - name: Generate SBOM
+        uses: anchore/sbom-action@dfcb83b97731532d72be422cbc51ee64adb6fd56 # v0.24.4
+        with:
+          image: ${{ env.IMAGE }}@${{ steps.push.outputs.digest }}
+          format: spdx-json
+          output-file: sbom.spdx.json
+          artifact-name: sbom.spdx.json
+
+      # 4. Sign the image and attach the SBOM, both by digest (the exact bytes).
+      - uses: sigstore/cosign-installer@881c63bd87e38389154debd8331404ce7ca8a3ab # v4.1.4
+      - name: Sign and attest
+        env:
+          REF: ${{ env.IMAGE }}@${{ steps.push.outputs.digest }}
+        run: |
+          cosign sign --yes "$REF"
+          cosign attest --yes --type spdxjson --predicate sbom.spdx.json "$REF"

@@ -1,0 +1,16 @@
+# Daniel Aburquez
+
+> Daniel Aburquez ("Dan") is a DevOps engineer and indie developer who builds automations, AI tools and websites for businesses, so owners and teams get their time back. Contact: hello@danielaburquez.com
+
+## Pages
+
+- [Home](https://danielaburquez.com/): selected work, anonymised automation case studies, about, certifications and contact.
+- [How this site works](https://danielaburquez.com/how-this-site-works): the platform behind this site, what is built and live, the files that show it, and what is still planned.
+
+## Facts
+
+- Services: workflow automations (n8n, Gmail, Google Sheets, Trello, Follow Up Boss, Messenger, Telegram), AI tools (OpenAI), and websites (Astro, nginx, Docker).
+- Selected work: We Nailed It Media and We Match It (websites).
+- Certifications: AWS Certified Solutions Architect - Associate, AWS Certified Cloud Practitioner, Google Cybersecurity Professional Certificate. Cisco CCNA is listed as expired.
+- Code: the site itself is public at https://github.com/dan-the-man-99/danielaburquez.com
+- Claims rule: this site states only what is live and verifiable; planned work is labelled as planned.

@@ -8,8 +8,17 @@ import Ticker from '../components/Ticker.astro';
 interface Props {
   title: string;
   description: string;
+  /** Structured data (schema.org) for this page, as a plain object. */
+  schema?: Record<string, unknown>;
 }
-const { title, description } = Astro.props;
+const { title, description, schema } = Astro.props;
+const origin = 'https://danielaburquez.com';
+// Canonical URL has no trailing slash, matching the internal links.
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const canonical = origin + path;
+const ogImage = `${origin}/og.png`;
+// "<" is escaped so the JSON can never close its own <script> block.
+const jsonLd = schema && JSON.stringify(schema).replace(/</g, '\\u003c');
 const onGuide = Astro.url.pathname.startsWith('/how-this-site-works');
 
 // The section index shown in the desktop rail. Keep in step with the sections
@@ -32,6 +41,22 @@ const index = [
     <meta name="theme-color" content="#06202f" />
     <title>{title}</title>
     <meta name="description" content={description} />
+    <meta name="robots" content="index, follow, max-image-preview:large" />
+    <link rel="canonical" href={canonical} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="Daniel Aburquez" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta property="og:image" content={ogImage} />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="Daniel Aburquez: websites and automations" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content={title} />
+    <meta name="twitter:description" content={description} />
+    <meta name="twitter:image" content={ogImage} />
+    {jsonLd && <script type="application/ld+json" set:html={jsonLd} />}
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <!-- Tiny, same-origin: applies a saved colour theme before first paint -->
     <script is:inline src="/theme.js"></script>

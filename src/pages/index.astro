@@ -21,11 +21,58 @@ const flows = {
   crm: ['Trello', 'n8n', 'Follow Up Boss'],
   inbox: ['Messenger', 'n8n + OpenAI', ['Reply to the guest', 'Booking to Google Sheets + Gmail']],
 };
+
+// Structured data for search engines and AI assistants. Only facts already on
+// this page; the expired CCNA is left out on purpose.
+const origin = 'https://danielaburquez.com';
+const schema = {
+  '@context': 'https://schema.org',
+  '@graph': [
+    {
+      '@type': 'Person',
+      '@id': `${origin}/#dan`,
+      name: 'Daniel Aburquez',
+      alternateName: 'Dan',
+      url: origin,
+      email: 'hello@danielaburquez.com',
+      jobTitle: 'DevOps engineer and indie developer',
+      description: 'Builds automations, AI tools and websites that give business owners and teams their time back.',
+      knowsAbout: ['Business automation', 'AI tools', 'Web development', 'DevOps', 'Cloud infrastructure'],
+      sameAs: ['https://github.com/dan-the-man-99'],
+      hasCredential: certs
+        .filter((c) => !c.expired)
+        .map((c) => ({
+          '@type': 'EducationalOccupationalCredential',
+          name: `${c.issuer} ${c.name}`,
+          url: c.url,
+          recognizedBy: { '@type': 'Organization', name: c.issuer },
+        })),
+    },
+    {
+      '@type': 'WebSite',
+      '@id': `${origin}/#website`,
+      url: origin,
+      name: 'Daniel Aburquez',
+      inLanguage: 'en',
+      publisher: { '@id': `${origin}/#dan` },
+    },
+    {
+      '@type': 'ProfessionalService',
+      '@id': `${origin}/#service`,
+      name: 'Daniel Aburquez: automations, AI tools and websites',
+      url: origin,
+      email: 'hello@danielaburquez.com',
+      description: 'Automations, AI tools and websites for businesses.',
+      provider: { '@id': `${origin}/#dan` },
+    },
+  ],
+};
 ---
 
 <Base
   title="Daniel Aburquez: automations, AI tools and websites for businesses"
   description="Less busywork, more business. I build automations, AI tools and websites that give business owners and teams their time back."
+  schema={schema}
 >
   <Hero />
 
@@ -92,8 +139,7 @@ const flows = {
   </section>
 
   <!--
-    Claims rule (see platform/docs/brand-philosophy.md): only what is live and
-    verifiable. Keep this section in step with the status list on
+    Claims rule: only what is live and verifiable. Keep this section in step with the status list on
     /how-this-site-works. Don't add uptime, speed scores or "monitored" claims
     until the data and the status page exist.
   -->

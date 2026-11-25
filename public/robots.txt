@@ -1,0 +1,28 @@
+# Everyone is welcome to read this site, including search engines and AI
+# assistants. It is a portfolio: being found and quoted correctly is the point.
+User-agent: *
+Allow: /
+
+# AI crawlers, named so the intent is explicit and easy to change per bot.
+User-agent: GPTBot
+Allow: /
+User-agent: OAI-SearchBot
+Allow: /
+User-agent: ChatGPT-User
+Allow: /
+User-agent: ClaudeBot
+Allow: /
+User-agent: Claude-SearchBot
+Allow: /
+User-agent: Claude-User
+Allow: /
+User-agent: PerplexityBot
+Allow: /
+User-agent: Perplexity-User
+Allow: /
+User-agent: Google-Extended
+Allow: /
+User-agent: Applebot-Extended
+Allow: /
+
+Sitemap: https://danielaburquez.com/sitemap.xml
